@@ -24,6 +24,9 @@ export function DashboardNav() {
           <Link to="/features">
             <Button variant="ghost" className="text-lg hover:from-indigo-500 hover:to-purple-500 bg-gradient-to-r hover:text-white transition-transform hover:scale-110 duration-200 font-playfair px-4 py-2">Features</Button>
           </Link>
+          <Link to="/dashboard">
+            <Button variant="ghost" className="text-lg hover:from-indigo-500 hover:to-purple-500 bg-gradient-to-r hover:text-white transition-transform hover:scale-110 duration-200 font-playfair px-4 py-2">Dashboard</Button>
+          </Link>
           <Link to="/profile">
             <Button variant="ghost" className="text-lg hover:from-indigo-500 hover:to-purple-500 bg-gradient-to-r hover:text-white transition-transform hover:scale-110 duration-200 font-playfair px-4 py-2">
               <UserCircle2 className="h-5 w-5 mr-1" />

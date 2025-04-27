@@ -6,43 +6,49 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import AptitudeQuestionBank from "./pages/AptitudeQuestionBank";
 import Auth from "./pages/Auth";
 import Practice from "./pages/Practice";
 import Interview from "./pages/Interview";
-// import InterviewPages from "./pages/InterviewPage";
+import InterviewPages from "./pages/InterviewPage";
 import FeedbackPage from "./pages/FeedbackPage";
 import ProfileSetup from "./components/ProfileSetup";
 import ProfileDisplay from "./components/ProfileDisplay";
 import Dashboard from "./pages/Dashboard";
 import ChatPractice from "./pages/ChatPractice";
-import Features from "./pages/Features";
+import { Features } from "./pages/Features";
+import React from "react";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/profile-setup" element={<ProfileSetup />} />
-          <Route path="/practice" element={<Practice />} />
-          <Route path="/voice-practice" element={<Interview />} />
-          {/* <Route path="/voice-practice" element={<InterviewPages />} /> */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/interview/feedback" element={<FeedbackPage />} />
-          <Route path="/interview/:interviewId/feedback" element={<FeedbackPage />} />
-          <Route path="/chat-practices" element={<ChatPractice />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/profile" element={<ProfileDisplay />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/profile-setup" element={<ProfileSetup />} />
+            <Route path="/practice" element={<Practice />} />
+            <Route path="/voice-practice" element={<Interview />} />
+            <Route path="/voice-practices" element={<InterviewPages />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/interview/feedback" element={<FeedbackPage />} />
+            <Route path="/interview/:interviewId/feedback" element={<FeedbackPage />} />
+            <Route path="/chat-practices" element={<ChatPractice />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/profile" element={<ProfileDisplay />} />
+            <Route path="/aptitude-question-bank" element={<AptitudeQuestionBank />} />
+            <Route path="/aptitude" element={<AptitudeQuestionBank />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TooltipProvider>
       </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+};
 
 export default App;

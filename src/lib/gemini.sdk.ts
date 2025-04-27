@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "sonner";
+import { ReactNode } from "react";
 
 export interface InterviewParams {
   userId: string;
@@ -20,6 +21,14 @@ export interface GenerateQuestionsResponse {
 }
 
 export interface AnswerFeedback {
+  summary: ReactNode;
+  confidence(confidence: any): unknown;
+  technicalAccuracy(technicalAccuracy: any): unknown;
+  conciseness: number;
+  strengths: any;
+  improvements: any;
+  fillerWordsAnalysis: any;
+  responseTimeAnalysis: any;
   clarity: number; // 1-10
   relevance: number; // 1-10
   completeness: number; // 1-10
@@ -161,12 +170,7 @@ async function saveInterviewToFirebase(
 
 // New function to analyze answers and provide feedback
 export const analyzeAnswer = async (
-  question: string,
-  answer: string,
-  jobRole: string,
-  experienceLevel: string,
-  responseTime?: number
-): Promise<AnswerFeedback> => {
+question: string, answer: string, jobRole: string, experienceLevel: string, responseTime?: number, fillerWords?: string[], hesitations?: number): Promise<AnswerFeedback> => {
   try {
     const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
@@ -239,25 +243,23 @@ export const analyzeAnswer = async (
     return feedback;
   } catch (error) {
     console.error('Error analyzing answer:', error);
-    toast.error("Failed to analyze your answer. Using default feedback.");
-    
-    // Provide a default feedback if analysis fails
-    return {
-      clarity: 5,
-      relevance: 5,
-      completeness: 5,
-      fillerWordsCount: 0,
-      fillerWords: [],
-      confidenceLevel: 5,
-      suggestions: [
-        "We couldn't analyze your answer in detail. Try speaking clearly.",
-        "Make sure your microphone is working properly.",
-        "Consider providing more detailed responses."
-      ],
-      responseTime: responseTime || undefined,
-      responseTimeScore: responseTime ? 5 : undefined,
-      overallScore: 5
-    };
+    toast.error("Failed to analyze your answer. Using default feedback.")
+    // return {
+    //   clarity: 5,
+    //   relevance: 5,
+    //   completeness: 5,
+    //   fillerWordsCount: 0,
+    //   fillerWords: [],
+    //   confidenceLevel: 5,
+    //   suggestions: [
+    //     "We couldn't analyze your answer in detail. Try speaking clearly.",
+    //     "Make sure your microphone is working properly.",
+    //     "Consider providing more detailed responses."
+    //   ],
+    //   responseTime: responseTime || undefined,
+    //   responseTimeScore: responseTime ? 5 : undefined,
+    //   overallScore: 5
+    // };
   }
 };
 
