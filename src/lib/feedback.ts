@@ -1,63 +1,38 @@
 
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { toast } from "sonner";
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'sonner';
 
-interface FeedbackParams {
-  interviewId: string | null;
-  userId: string;
+// Create detailed interview feedback
+export async function createFeedback({ 
+  interviewId, 
+  userId, 
+  transcript,
+  feedbackId = null
+}: { 
+  interviewId: string | null; 
+  userId: string; 
   transcript: { role: string; content: string }[];
-  feedbackId?: string | null;
-}
-
-interface FeedbackResult {
-  success: boolean;
   feedbackId: string | null;
-  message?: string;
-}
-
-export const createFeedback = async (params: FeedbackParams): Promise<FeedbackResult> => {
+}) {
   try {
-    if (!params.interviewId || !params.userId || params.transcript.length === 0) {
-      throw new Error('Missing required parameters for feedback generation');
-    }
-
-    // Format transcript for better readability
-    const formattedTranscript = params.transcript.map((item) => {
-      return `${item.role === 'assistant' ? 'Interviewer' : 'Candidate'}: ${item.content}`;
-    }).join('\n\n');
-
-    // Create the feedback document in Firestore
-    const feedbackDoc = await addDoc(collection(db, "feedback"), {
-      interviewId: params.interviewId,
-      userId: params.userId,
-      transcript: formattedTranscript,
-      status: "processing",
-      timestamp: serverTimestamp(),
-    });
-
-    console.log('Feedback document created:', feedbackDoc.id);
+    // In a real application, you would make an API call to process and store feedback
+    console.log(`Creating feedback for interview ${interviewId}`);
     
-    toast.success("Feedback request submitted successfully!");
+    // Generate a new feedback ID if not provided
+    const newFeedbackId = feedbackId || uuidv4();
     
-    return {
-      success: true,
-      feedbackId: feedbackDoc.id,
+    // For now, we'll just return success
+    return { 
+      success: true, 
+      feedbackId: newFeedbackId 
     };
   } catch (error) {
-    console.error('Error creating feedback:', error);
-    toast.error("Failed to create feedback. Please try again.");
-    
-    return {
+    console.error("Error creating feedback:", error);
+    toast.error("Failed to create feedback");
+    return { 
       success: false,
-      feedbackId: null,
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
+      error: String(error),
+      feedbackId: null
     };
   }
-};
-
-// Constants for the interviewer configuration
-export const interviewer = {
-  id: "interview-coach",
-  name: "Interview Coach",
-};
+}

@@ -99,8 +99,8 @@ const InterviewPage = () => {
         userName,
         jobRole,
         techStack: techStack.split(',').map(item => item.trim()).filter(item => item.length > 0),
-        experienceLevel,
-        questionCount: 5
+        questionCount: 5,
+        experienceLevel: 'intermediate'
       };
       
       console.log("Generating interview with params:", params);

@@ -1,10 +1,20 @@
 
 import React from 'react';
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter
+} from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent
+} from "@/components/ui/accordion";
+import { BarChart, MessageSquare, Mic, AlertCircle, Check } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
-import { AnswerFeedback } from "@/lib/gemini.sdk";
-import { cn } from "@/lib/utils";
-import { MessageSquare, ThumbsUp, AlertTriangle, VolumeX, Clock } from 'lucide-react';
+import { AnswerFeedback } from '@/lib/gemini.sdk';
 
 interface AnswerFeedbackCardProps {
   question: string;
@@ -19,135 +29,184 @@ const AnswerFeedbackCard: React.FC<AnswerFeedbackCardProps> = ({
   feedback,
   questionNumber
 }) => {
-  // Helper to get color class based on score
-  const getScoreColorClass = (score: number) => {
+  // Helper function to get color based on score
+  const getScoreColor = (score: number) => {
     if (score >= 8) return "text-green-500";
-    if (score >= 5) return "text-amber-500";
+    if (score >= 6) return "text-amber-500";
     return "text-red-500";
-  };
-  
-  // Helper to get badge variant based on score
-  const getScoreBadgeVariant = (score: number) => {
-    if (score >= 8) return "default";
-    if (score >= 5) return "secondary";
-    return "destructive";
-  };
-
-  // Format response time to a readable string
-  const formatResponseTime = (seconds?: number): string => {
-    if (!seconds) return "Not measured";
-    
-    if (seconds < 60) {
-      return `${seconds.toFixed(1)} seconds`;
-    } else {
-      const minutes = Math.floor(seconds / 60);
-      const remainingSeconds = seconds % 60;
-      return `${minutes}m ${remainingSeconds.toFixed(0)}s`;
-    }
   };
 
   return (
-    <Card className="w-full mb-4 shadow-sm">
-      <CardHeader className="pb-2">
-        <div className="flex flex-row justify-between items-center">
-          <CardTitle className="text-lg font-medium">
-            Question {questionNumber}: {question}
-          </CardTitle>
-          <Badge variant={getScoreBadgeVariant(feedback.overallScore)}>
-            Score: {feedback.overallScore}/10
+    <Card className="mb-4 overflow-hidden shadow border border-border/40">
+      <CardHeader className="bg-accent/30 pb-3 pt-3">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center">
+            <Badge variant="outline" className="mr-2 bg-primary/20">
+              Q{questionNumber}
+            </Badge>
+            <h3 className="font-medium">{question}</h3>
+          </div>
+          <Badge className={getScoreColor(feedback.overallScore)}>
+            {feedback.overallScore}/10
           </Badge>
         </div>
       </CardHeader>
-      
-      <CardContent>
-        <div className="space-y-4">
-          {/* User's Answer */}
-          <div className="bg-muted p-3 rounded-md">
-            <div className="flex items-center gap-2 mb-1">
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Your Answer:</span>
-            </div>
-            <p className="text-sm">{answer}</p>
-          </div>
-          
-          {/* Metrics */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            <div className="bg-background p-2 rounded border">
-              <div className="text-xs text-muted-foreground uppercase">Clarity</div>
-              <div className={cn("text-lg font-semibold", getScoreColorClass(feedback.clarity))}>
-                {feedback.clarity}/10
-              </div>
-            </div>
-            
-            <div className="bg-background p-2 rounded border">
-              <div className="text-xs text-muted-foreground uppercase">Relevance</div>
-              <div className={cn("text-lg font-semibold", getScoreColorClass(feedback.relevance))}>
-                {feedback.relevance}/10
-              </div>
-            </div>
-            
-            <div className="bg-background p-2 rounded border">
-              <div className="text-xs text-muted-foreground uppercase">Completeness</div>
-              <div className={cn("text-lg font-semibold", getScoreColorClass(feedback.completeness))}>
-                {feedback.completeness}/10
-              </div>
-            </div>
-            
-            <div className="bg-background p-2 rounded border">
-              <div className="text-xs text-muted-foreground uppercase">Confidence</div>
-              <div className={cn("text-lg font-semibold", getScoreColorClass(feedback.confidenceLevel))}>
-                {feedback.confidenceLevel}/10
-              </div>
-            </div>
-            
-            {feedback.responseTime !== undefined && (
-              <div className="bg-background p-2 rounded border">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3 text-muted-foreground" />
-                  <div className="text-xs text-muted-foreground uppercase">Response Time</div>
-                </div>
-                <div className="text-sm font-semibold">
-                  {formatResponseTime(feedback.responseTime)}
-                </div>
-                {feedback.responseTimeScore && (
-                  <div className={cn("text-xs font-medium mt-0.5", getScoreColorClass(feedback.responseTimeScore))}>
-                    Score: {feedback.responseTimeScore}/10
-                  </div>
-                )}
-              </div>
-            )}
-            
-            <div className="bg-background p-2 rounded border col-span-1 sm:col-span-2">
+      <CardContent className="pt-3">
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="answer">
+            <AccordionTrigger className="text-sm">
               <div className="flex items-center gap-2">
-                <VolumeX className="h-4 w-4 text-muted-foreground" />
-                <div className="text-xs text-muted-foreground uppercase">
-                  Filler Words: {feedback.fillerWordsCount}
+                <Mic className="h-4 w-4" />
+                Your Answer
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="text-muted-foreground">
+              {answer}
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="feedback">
+            <AccordionTrigger className="text-sm">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                Detailed Feedback
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-muted-foreground">Relevance</span>
+                    <div className="flex items-center">
+                      <span className={`text-sm font-medium ${getScoreColor(feedback.relevance)}`}>{feedback.relevance}/10</span>
+                      <div className="ml-2 bg-muted rounded-full h-1.5 w-full">
+                        <div
+                          className={`h-1.5 rounded-full ${
+                            feedback.relevance >= 8 ? "bg-green-500" :
+                            feedback.relevance >= 6 ? "bg-amber-500" : "bg-red-500"
+                          }`}
+                          style={{ width: `${feedback.relevance * 10}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-muted-foreground">Clarity</span>
+                    <div className="flex items-center">
+                      <span className={`text-sm font-medium ${getScoreColor(feedback.clarity)}`}>{feedback.clarity}/10</span>
+                      <div className="ml-2 bg-muted rounded-full h-1.5 w-full">
+                        <div
+                          className={`h-1.5 rounded-full ${
+                            feedback.clarity >= 8 ? "bg-green-500" :
+                            feedback.clarity >= 6 ? "bg-amber-500" : "bg-red-500"
+                          }`}
+                          style={{ width: `${feedback.clarity * 10}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-muted-foreground">Technical Depth</span>
+                    <div className="flex items-center">
+                      <span className={`text-sm font-medium ${getScoreColor(feedback.depth)}`}>{feedback.depth}/10</span>
+                      <div className="ml-2 bg-muted rounded-full h-1.5 w-full">
+                        <div
+                          className={`h-1.5 rounded-full ${
+                            feedback.depth >= 8 ? "bg-green-500" :
+                            feedback.depth >= 6 ? "bg-amber-500" : "bg-red-500"
+                          }`}
+                          style={{ width: `${feedback.depth * 10}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-muted-foreground">Conciseness</span>
+                    <div className="flex items-center">
+                      <span className={`text-sm font-medium ${getScoreColor(feedback.conciseness)}`}>{feedback.conciseness}/10</span>
+                      <div className="ml-2 bg-muted rounded-full h-1.5 w-full">
+                        <div
+                          className={`h-1.5 rounded-full ${
+                            feedback.conciseness >= 8 ? "bg-green-500" :
+                            feedback.conciseness >= 6 ? "bg-amber-500" : "bg-red-500"
+                          }`}
+                          style={{ width: `${feedback.conciseness * 10}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-muted-foreground">Confidence</span>
+                    <div className="flex items-center">
+                      <span className={`text-sm font-medium ${getScoreColor(feedback.confidence)}`}>{feedback.confidence}/10</span>
+                      <div className="ml-2 bg-muted rounded-full h-1.5 w-full">
+                        <div
+                          className={`h-1.5 rounded-full ${
+                            feedback.confidence >= 8 ? "bg-green-500" :
+                            feedback.confidence >= 6 ? "bg-amber-500" : "bg-red-500"
+                          }`}
+                          style={{ width: `${feedback.confidence * 10}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-muted-foreground">Technical Accuracy</span>
+                    <div className="flex items-center">
+                      <span className={`text-sm font-medium ${getScoreColor(feedback.technicalAccuracy)}`}>{feedback.technicalAccuracy}/10</span>
+                      <div className="ml-2 bg-muted rounded-full h-1.5 w-full">
+                        <div
+                          className={`h-1.5 rounded-full ${
+                            feedback.technicalAccuracy >= 8 ? "bg-green-500" :
+                            feedback.technicalAccuracy >= 6 ? "bg-amber-500" : "bg-red-500"
+                          }`}
+                          style={{ width: `${feedback.technicalAccuracy * 10}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex items-center gap-1 mb-1">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm font-medium">Strengths</span>
+                  </div>
+                  <ul className="list-disc pl-5 text-sm text-muted-foreground">
+                    {feedback.strengths.map((strength, idx) => (
+                      <li key={idx}>{strength}</li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div>
+                  <div className="flex items-center gap-1 mb-1">
+                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <span className="text-sm font-medium">Areas for Improvement</span>
+                  </div>
+                  <ul className="list-disc pl-5 text-sm text-muted-foreground">
+                    {feedback.weaknesses.map((weakness, idx) => (
+                      <li key={idx}>{weakness}</li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div className="pb-2">
+                  <div className="flex items-center gap-1 mb-1">
+                    <BarChart className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Summary</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{feedback.summary}</p>
+                  {feedback.fillerWordCount > 0 && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      <span className="font-medium">Filler words used:</span> {feedback.fillerWordCount}
+                    </p>
+                  )}
                 </div>
               </div>
-              <div className="text-sm mt-1">
-                {feedback.fillerWords.length > 0 
-                  ? feedback.fillerWords.join(", ") 
-                  : "No filler words detected"}
-              </div>
-            </div>
-          </div>
-          
-          {/* Suggestions */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              {feedback.overallScore >= 7 
-                ? <ThumbsUp className="h-4 w-4 text-green-500" />
-                : <AlertTriangle className="h-4 w-4 text-amber-500" />
-              }
-              <span className="font-medium">Improvement Suggestions:</span>
-            </div>
-            <ul className="text-sm space-y-1 list-disc pl-5">
-              {feedback.suggestions.map((suggestion, idx) => (
-                <li key={idx}>{suggestion}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </CardContent>
     </Card>
   );

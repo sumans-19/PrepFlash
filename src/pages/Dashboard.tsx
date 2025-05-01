@@ -42,12 +42,11 @@ const SectionCard = ({ title, icon, description, features, to, accentColor }: Se
       className="w-full"
     >
       <Card className="relative overflow-hidden border-2 dark:bg-gray-800/50 bg-white/50 backdrop-blur-sm h-full">
-        <div 
-          className="absolute inset-0 opacity-10" 
-          style={{ 
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
             background: `linear-gradient(135deg, ${accentColor}40 0%, transparent 100%)`,
-          }}
-        />
+          }} />
         <CardHeader className="relative z-10">
           <div className="flex items-center gap-3">
             <span className="p-2 rounded-lg" style={{ backgroundColor: `${accentColor}20`, color: accentColor }}>
@@ -71,7 +70,7 @@ const SectionCard = ({ title, icon, description, features, to, accentColor }: Se
           <Button
             asChild
             className="w-full font-medium"
-            style={{ 
+            style={{
               background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}90 100%)`,
             }}
           >
@@ -125,7 +124,7 @@ const Dashboard = () => {
         "Performance analytics",
         "Selection criteria preparation"
       ],
-      to: "/aptitude",
+      to: "/aptitudehome",
       accentColor: "#7E69AB"
     },
     {

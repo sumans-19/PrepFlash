@@ -18,7 +18,6 @@ export function Features() {
   const animationFrameRef = useRef<number>(0);
 
   useEffect(() => {
-    document.title = 'Features | PrepMaster';
 
     // Add scrolling animations to reveal elements with more dynamic effects
     const observer = new IntersectionObserver((entries) => {

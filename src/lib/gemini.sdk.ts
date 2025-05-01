@@ -1,291 +1,351 @@
-// Gemini AI SDK wrapper for interview questions generation
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { toast } from "sonner";
-import { ReactNode } from "react";
+import { v4 as uuidv4 } from 'uuid';
 
-export interface InterviewParams {
+// Define types
+export type InterviewParams = {
   userId: string;
   userName: string;
-  jobRole?: string;
-  industry?: string;
-  experienceLevel?: string;
-  questionCount?: number;
-  techStack?: string[];
-}
+  jobRole: string;
+  techStack: string[];
+  experienceLevel: 'beginner' | 'intermediate' | 'expert';
+  questionCount: number;
+};
 
-export interface GenerateQuestionsResponse {
-  questions: string[];
-  interviewId: string;
-}
-
-export interface AnswerFeedback {
-  summary: ReactNode;
-  confidence(confidence: any): unknown;
-  technicalAccuracy(technicalAccuracy: any): unknown;
-  conciseness: number;
-  strengths: any;
-  improvements: any;
-  fillerWordsAnalysis: any;
-  responseTimeAnalysis: any;
-  clarity: number; // 1-10
+export type AnswerFeedback = {
   relevance: number; // 1-10
-  completeness: number; // 1-10
-  fillerWordsCount: number;
-  fillerWords: string[];
-  confidenceLevel: number; // 1-10
-  suggestions: string[];
+  clarity: number; // 1-10
+  depth: number; // 1-10
+  conciseness: number; // 1-10
+  confidence: number; // 1-10
+  fillerWordCount: number;
+  technicalAccuracy: number; // 1-10
   overallScore: number; // 1-10
-  responseTime?: number; // in seconds (optional)
-  responseTimeScore?: number; // 1-10 (optional)
-}
-
-// Helper to generate a unique ID
-const generateId = () => {
-  return Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15);
+  strengths: string[];
+  weaknesses: string[];
+  improvements: string[];
+  summary: string;
 };
 
-export const geminiGenerateQuestions = async (
-  params: InterviewParams
-): Promise<GenerateQuestionsResponse> => {
-  console.log('Generating interview questions with params:', params);
+export type AptitudeQuestionParams = {
+  topic: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  format?: 'MCQ' | 'Conceptual';
+};
 
-  // Create a prompt based on available parameters
-  const prompt = `
-    Generate ${params.questionCount || 5} interview questions for ${params.userName} 
-    who is applying for a ${params.jobRole || 'software developer'} position
-    ${params.industry ? `in the ${params.industry} industry` : ''}
-    ${params.experienceLevel ? `at a ${params.experienceLevel} experience level` : ''}
-    ${params.techStack && params.techStack.length > 0
-      ? `with experience in ${params.techStack.join(', ')}`
-      : ''}
+export type AptitudeQuestionResult = {
+  question: string;
+  answer: string;
+  explanation?: string;
+  options?: string[];
+};
 
-    Format the questions as a numbered list. Focus on both technical skills and soft skills.
-    Make the questions challenging but appropriate for their experience level.
-  `;
+export type AptitudeBrushUpResult = {
+  theory: string;
+  formulas: string;
+  examples: string;
+};
 
-  try {
-    const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+export type AptitudeBrushUpParams = {
+  topic: string;
+};
 
-    if (!GEMINI_API_KEY) {
-      console.error('No API key found for Gemini');
-      toast.error("Gemini API key not found. Please check your environment variables.");
-      throw new Error('Gemini API key not found');
-    }
+// Mock Gemini API key - in production this would come from environment variables
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 
-    console.log('Making API request to Gemini...');
-    toast.info("Generating interview questions...");
-
-    // Initialize the Google Generative AI with the API key
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-
-    // Get the model - Using the correct model name
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-
-    // Generate content with proper error handling
-    const apiResponse = await model.generateContent(prompt);
-    const response = apiResponse.response;
-    const text = response.text();
-
-    if (!text) {
-      throw new Error('Empty response from Gemini API');
-    }
-
-    console.log('Raw Gemini response:', text);
-
-    // Parse questions using various strategies
-    let questions: string[] = [];
-
-    // Strategy 1: Match numbered questions (e.g. "1. Question" or "1) Question")
-    const numberedRegex = /(?:\d+[\.\)]\s*)([^\n]+)/g;
-    let match;
-    while ((match = numberedRegex.exec(text)) !== null) {
-      if (match[1].trim().length > 0) {
-        questions.push(match[1].trim());
-      }
-    }
-
-    // If no questions found, try Strategy 2
-    if (questions.length === 0) {
-      questions = text.split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 5 && line.includes('?'))
-        .map(line => line.replace(/^\d+[\.\)]\s*/, ''));
-    }
-
-    console.log('Extracted questions:', questions);
-
-    if (questions.length === 0) {
-      throw new Error('Could not extract questions from Gemini response');
-    }
-
-    // Limit to requested number of questions
-    questions = questions.slice(0, params.questionCount || 5);
-
-    const interviewData = {
-      questions,
-      interviewId: generateId()
-    };
-
-    // Save to Firebase
-    await saveInterviewToFirebase(interviewData, params);
-    toast.success("Interview questions generated successfully!");
-
-    return interviewData;
-  } catch (error) {
-    console.error('Error generating questions:', error);
-    toast.error("Failed to generate questions. Please try again.");
-    throw error;
+// Helper to make API calls to Gemini
+async function callGeminiAPI(prompt: string, model = 'gemini-2.0-flash') {
+  if (!API_KEY) {
+    throw new Error('Gemini API key not found. Please set VITE_GEMINI_API_KEY.');
   }
-};
 
-// Helper function to save the interview data to Firebase
-async function saveInterviewToFirebase(
-  result: GenerateQuestionsResponse,
-  params: InterviewParams
-): Promise<GenerateQuestionsResponse> {
   try {
-    console.log('Saving interview to Firebase:', result);
-    await addDoc(collection(db, "interviews"), {
-      interviewId: result.interviewId,
-      userId: params.userId,
-      userName: params.userName,
-      jobRole: params.jobRole || "Software Developer",
-      industry: params.industry || null,
-      experienceLevel: params.experienceLevel || "intermediate",
-      techStack: params.techStack || [],
-      questions: result.questions,
-      status: "created",
-      timestamp: serverTimestamp(),
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: prompt }],
+          },
+        ],
+      }),
     });
 
-    return result;
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Gemini API error:', data);
+      throw new Error(data.error?.message || 'Unknown error from Gemini API');
+    }
+
+    if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      throw new Error('Unexpected response format from Gemini API');
+    }
+
+    return data.candidates[0].content.parts[0].text;
   } catch (error) {
-    console.error("Error saving interview to Firebase:", error);
+    console.error('Error calling Gemini API:', error);
     throw error;
   }
 }
 
-// New function to analyze answers and provide feedback
-export const analyzeAnswer = async (
-question: string, answer: string, jobRole: string, experienceLevel: string, responseTime?: number, fillerWords?: string[], hesitations?: number): Promise<AnswerFeedback> => {
+// Generate interview questions based on user profile
+export async function geminiGenerateQuestions(params: InterviewParams) {
   try {
-    const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+    const { userId, userName, jobRole, techStack, experienceLevel, questionCount } = params;
 
-    if (!GEMINI_API_KEY) {
-      throw new Error('Gemini API key not found');
-    }
-
-    console.log('Analyzing answer with Gemini...');
-    toast.info("Analyzing your response...");
-
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-
-    // Calculate response time score if available
-    const responseTimeInfo = responseTime 
-      ? `The candidate took ${responseTime.toFixed(1)} seconds to respond.` 
-      : '';
-
-    // Create a prompt for analysis
     const prompt = `
-      As an expert interview coach, analyze this interview response for a ${jobRole} position at ${experienceLevel} level.
-      
-      Question: "${question}"
-      
-      Answer: "${answer}"
-      
-      ${responseTimeInfo}
-      
-      Provide a detailed analysis in the following JSON format:
-      {
-        "clarity": <number between 1-10>,
-        "relevance": <number between 1-10>,
-        "completeness": <number between 1-10>,
-        "fillerWordsCount": <number of filler words used>,
-        "fillerWords": [<array of filler words detected>],
-        "confidenceLevel": <number between 1-10>,
-        "suggestions": [<array of 3 specific improvement suggestions>],
-        ${responseTime ? '"responseTimeScore": <number between 1-10 based on how appropriate the response time was>,' : ''}
-        "overallScore": <number between 1-10>
-      }
-      
-      For fillerWords detection, look for words and phrases like "um", "uh", "like", "you know", "sort of", "kind of", etc.
-      
-      When scoring:
-      - For clarity, consider how well-articulated and understandable the answer is.
-      - For relevance, assess how directly the answer addresses the question.
-      - For completeness, evaluate if all aspects of the question were answered.
-      - For confidenceLevel, judge the assertiveness and certainty in the delivery.
-      ${responseTime ? `- For responseTimeScore, consider if the response time was appropriate (not too quick without thought, not too slow showing hesitation).` : ''}
-      - For overallScore, calculate a weighted average giving more importance to relevance and completeness.
-      
-      Make your evaluation fair but constructive. Only return valid JSON without any additional text.
+      Generate ${questionCount} challenging technical interview questions for a ${experienceLevel} ${jobRole}.
+      The candidate has experience with the following technologies: ${techStack.join(', ')}.
+      Focus on practical knowledge and real-world scenarios.
+      Format the response as a list of numbered questions only, without any additional text.
+      Questions should include a mix of technical knowledge, problem-solving, and experience-based questions .
     `;
 
-    const apiResponse = await model.generateContent(prompt);
-    const response = apiResponse.response;
-    const text = response.text();
+    console.log("Sending prompt to Gemini:", prompt);
 
-    if (!text) {
-      throw new Error('Empty response from Gemini API');
+    const response = await callGeminiAPI(prompt);
+
+    // Parse the response to extract questions (assuming the response is a list of questions)
+    const questions = response
+      .split('\n')
+      .filter(line => line.trim().match(/^\d+\./) || line.trim().match(/^-/))
+      .map(line => line.replace(/^\d+\.\s*|-\s*/, '').trim())
+      .slice(0, questionCount);
+
+    // Generate a unique ID for this interview
+    const interviewId = uuidv4();
+
+    // In a real application, you might want to store these questions in a database
+    console.log(`Generated ${questions.length} questions for interview ${interviewId}`);
+
+    return {
+      questions,
+      interviewId,
+    };
+  } catch (error) {
+    console.error("Error generating interview questions:", error);
+    throw error;
+  }
+}
+
+// Analyze a user's answer to provide detailed feedback
+export async function analyzeAnswer(
+  question: string,
+  answer: string,
+  jobRole: string,
+  experienceLevel: string
+): Promise<AnswerFeedback> {
+  try {
+    const prompt = `
+      As a technical interviewer for a ${jobRole} position, analyze the following answer to this interview question:
+
+      Question: "${question}"
+
+      Answer: "${answer}"
+
+      The candidate is at a ${experienceLevel} level.
+
+      Provide an objective analysis with numerical ratings (1-10) for:
+      - Relevance to the question
+      - Clarity of expression
+      - Depth of knowledge
+      - Conciseness
+      - Confidence/communication style
+      - Technical accuracy
+
+      Also identify:
+      - Count of filler words used (um, uh, like, you know, etc.)
+      - 2-3 strengths of the answer
+      - 2-3 weaknesses or areas for improvement
+      - 2-3 specific suggestions for improvement
+      - An overall score (1-10)
+      - A brief summary (1-2 sentences)
+
+      Format the response as a JSON object with these exact fields:
+      {
+        "relevance": number,
+        "clarity": number,
+        "depth": number,
+        "conciseness": number,
+        "confidence": number,
+        "fillerWordCount": number,
+        "technicalAccuracy": number,
+        "overallScore": number,
+        "strengths": [string, string, ...],
+        "weaknesses": [string, string, ...],
+        "improvements": [string, string, ...],
+        "summary": string
+      }
+    `;
+
+    const response = await callGeminiAPI(prompt);
+
+    // Extract JSON from the response
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+
+    if (!jsonMatch) {
+      throw new Error('Failed to extract valid JSON from Gemini response');
     }
 
-    console.log('Raw feedback response:', text);
+    const feedbackJson = JSON.parse(jsonMatch[0]);
 
-    // Parse JSON from the response
-    // First, let's clean up the string to ensure it's valid JSON
-    const jsonStr = text.replace(/```json|```/g, '').trim();
-    const feedback = JSON.parse(jsonStr) as AnswerFeedback;
-
-    return feedback;
+    return feedbackJson as AnswerFeedback;
   } catch (error) {
-    console.error('Error analyzing answer:', error);
-    toast.error("Failed to analyze your answer. Using default feedback.")
-    // return {
-    //   clarity: 5,
-    //   relevance: 5,
-    //   completeness: 5,
-    //   fillerWordsCount: 0,
-    //   fillerWords: [],
-    //   confidenceLevel: 5,
-    //   suggestions: [
-    //     "We couldn't analyze your answer in detail. Try speaking clearly.",
-    //     "Make sure your microphone is working properly.",
-    //     "Consider providing more detailed responses."
-    //   ],
-    //   responseTime: responseTime || undefined,
-    //   responseTimeScore: responseTime ? 5 : undefined,
-    //   overallScore: 5
-    // };
+    console.error("Error analyzing answer:", error);
+    // Return a default feedback object in case of error
+    return {
+      relevance: 5,
+      clarity: 5,
+      depth: 5,
+      conciseness: 5,
+      confidence: 5,
+      fillerWordCount: 0,
+      technicalAccuracy: 5,
+      overallScore: 5,
+      strengths: ['Unable to analyze strengths'],
+      weaknesses: ['Unable to analyze weaknesses'],
+      improvements: ['Try providing a more detailed answer'],
+      summary: 'Analysis failed due to technical error'
+    };
   }
-};
+}
 
-// Function to save answer feedback to Firebase
-export const saveAnswerFeedback = async (
+// Save the feedback for an answer to a persistent storage
+export async function saveAnswerFeedback(
   interviewId: string,
   userId: string,
   questionIndex: number,
   question: string,
   answer: string,
   feedback: AnswerFeedback
-): Promise<void> => {
+) {
   try {
-    await addDoc(collection(db, "answerFeedbacks"), {
+    // In a real application, you would save this to Firebase or another database
+    console.log(`Saving feedback for interview ${interviewId}, question ${questionIndex + 1}`);
+
+    // For now, we'll just log it to console
+    console.log({
       interviewId,
       userId,
       questionIndex,
       question,
       answer,
       feedback,
-      timestamp: serverTimestamp(),
+      timestamp: new Date()
     });
-    
-    console.log('Answer feedback saved to Firebase');
+
+    return { success: true };
   } catch (error) {
-    console.error('Error saving answer feedback:', error);
+    console.error("Error saving feedback:", error);
+    return { success: false, error };
+  }
+}
+
+// Generate an aptitude question based on user parameters
+export async function generateAptitudeQuestion(params: AptitudeQuestionParams): Promise<AptitudeQuestionResult> {
+  try {
+    const { topic, difficulty, format = 'Conceptual' } = params;
+
+    const prompt = `
+      Generate a ${difficulty} level aptitude question about ${topic}.
+      Make it practical and relevant to real-world scenarios.
+
+      ${format === 'MCQ'
+        ? 'Create a multiple choice question with 4 options, ensuring each option is distinct and plausible.'
+        : 'Create a conceptual question that tests deep understanding, with a detailed step-by-step solution.'
+      }
+
+      The response should follow this format:
+      Question: [Your question here]
+      ${format === 'MCQ'
+        ? 'Options:\nA. [option 1]\nB. [option 2]\nC. [option 3]\nD. [option 4]\nCorrect Answer: [letter]'
+        : 'Answer: [detailed solution]'
+      }
+      Explanation: [Clear explanation of the solution process]
+
+      Include at least one practical application or real-world example in the explanation.
+    `;
+
+    console.log("Sending prompt to Gemini for aptitude question:", prompt);
+
+    const response = await callGeminiAPI(prompt);
+
+    // Parse the response to extract question, answer, and explanation
+    const questionMatch = response.match(/Question:\s*(.*?)(?=Options:|Answer:|Explanation:|$)/s);
+    const optionsMatch = response.match(/Options:\s*(.*?)(?=Correct Answer:|Explanation:|$)/s);
+    const correctAnswerMatch = response.match(/Correct Answer:\s*(.*?)(?=Explanation:|$)/s);
+    const answerMatch = response.match(/Answer:\s*(.*?)(?=Explanation:|$)/s);
+    const explanationMatch = response.match(/Explanation:\s*(.*?)$/s);
+
+    const question = questionMatch ? questionMatch[1].trim() : '';
+    let answer = '';
+    let options: string[] = [];
+
+    if (format === 'MCQ') {
+      if (optionsMatch && optionsMatch[1]) {
+        options = optionsMatch[1].trim().split('\n').map(option => option.trim());
+      }
+      answer = correctAnswerMatch ? correctAnswerMatch[1].trim() : '';
+    } else {
+      answer = answerMatch ? answerMatch[1].trim() : '';
+    }
+
+    const explanation = explanationMatch ? explanationMatch[1].trim() : '';
+
+    return {
+      question,
+      answer,
+      explanation,
+      options: format === 'MCQ' ? options : undefined,
+    };
+  } catch (error) {
+    console.error("Error generating aptitude question:", error);
     throw error;
   }
-};
+}
+
+// Generate brush-up content for a given aptitude topic
+export async function generateAptitudeBrushUp(params: AptitudeBrushUpParams): Promise<AptitudeBrushUpResult> {
+  try {
+    const { topic } = params;
+
+    const prompt = `
+      Generate a comprehensive yet concise brush-up for the aptitude topic: "${topic}".
+
+      The response should be structured into three distinct sections, clearly marked with "### Theory", "### Formulas", and "### Solved Examples":
+
+      ### Theory
+      Explain the fundamental concepts and principles of "${topic}" in a clear and easy-to-understand manner. Use analogies or simple examples where helpful. Aim for a balance between thoroughness and brevity, suitable for a quick review.
+
+      ### Formulas
+      List all the important formulas and equations related to "${topic}". Present them clearly, possibly with a brief explanation of each variable involved. Use LaTeX formatting for mathematical expressions where appropriate.
+
+      ### Solved Examples
+      Provide 2-3 diverse example questions that illustrate the application of the concepts and formulas discussed. Show the step-by-step solution for each example, clearly explaining the reasoning behind each step.
+
+      Ensure the language is precise and avoids jargon where possible. The tone should be informative and helpful for someone looking to quickly refresh their understanding of the topic.
+    `;
+
+    console.log("Sending prompt to Gemini for aptitude brush up:", prompt);
+
+    const response = await callGeminiAPI(prompt);
+
+    // Parse the response to extract the three sections
+    const theoryMatch = response.match(/### Theory\n(.*?)\n### Formulas/s);
+    const formulasMatch = response.match(/### Formulas\n(.*?)\n### Solved Examples/s);
+    const examplesMatch = response.match(/### Solved Examples\n(.*?)$/s);
+
+    const theory = theoryMatch ? theoryMatch[1].trim() : 'No theory generated.';
+    const formulas = formulasMatch ? formulasMatch[1].trim() : 'No formulas generated.';
+    const examples = examplesMatch ? examplesMatch[1].trim() : 'No examples generated.';
+
+    return { theory, formulas, examples };
+  } catch (error) {
+    console.error("Error generating aptitude brush up:", error);
+    return { theory: 'Error generating theory.', formulas: 'Error generating formulas.', examples: 'Error generating examples.' };
+  }
+}

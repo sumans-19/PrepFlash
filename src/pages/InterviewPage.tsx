@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
 import {
   Card,
@@ -11,17 +11,17 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader, Check, MessageSquare, Video, Mic, Play, AlertCircle, BarChart } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Mic, Video, Loader, Check, MessageSquare, User, Play, ArrowDown, AlertCircle, BarChart } from 'lucide-react';
+import { cn } from "@/lib/utils";
+import { vapi } from "@/lib/vapi.sdk";
+import { geminiGenerateQuestions, InterviewParams, analyzeAnswer, saveAnswerFeedback, AnswerFeedback } from "@/lib/gemini.sdk";
+import { interviewer } from "@/constants";
+import { createFeedback } from "@/lib/feedback";
 import { DashboardNav } from "@/components/DashboardNav";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import AnswerFeedbackCard from "@/components/AnswerFeedbackCard";
-import InterviewPreparationForm from "@/components/InterviewPreparationForm";
-import InterviewSession from "@/components/InterviewSession";
-import { aiInterviewEngine, Message } from "@/lib/aiInterviewEngine";
-import { geminiGenerateQuestions, InterviewParams, analyzeAnswer, saveAnswerFeedback, AnswerFeedback } from "@/lib/gemini.sdk";
-import { createFeedback } from "@/lib/feedback";
-import { cn } from "@/lib/utils";
 
 const CallStatus = {
   INACTIVE: "INACTIVE",
@@ -35,773 +35,558 @@ type Stage = "idle" | "generating" | "ready" | "calling" | "analyzing" | "feedba
 
 const InterviewPage = () => {
   const [stage, setStage] = useState<Stage>("idle");
+
   const navigate = useNavigate();
-  const location = useLocation();
-  
   const [callStatus, setCallStatus] = useState(CallStatus.INACTIVE);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [interimTranscript, setInterimTranscript] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState("");
   const [interviewId, setInterviewId] = useState<string | null>(null);
+  const [feedbackId, setFeedbackId] = useState<string | null>(null);
   const [interviewQuestions, setInterviewQuestions] = useState<string[]>([]);
   const [lastMessage, setLastMessage] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(-1);
-  const [userAnswers, setUserAnswers] = useState<Message[]>([]);
-  const [answerFeedbacks, setAnswerFeedbacks] = useState<(AnswerFeedback | null)[]>([]);
+  const [userAnswers, setUserAnswers] = useState<string[]>([]);
+  const [answerFeedbacks, setAnswerFeedbacks] = useState<AnswerFeedback[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [overallScore, setOverallScore] = useState<number>(0);
-  const [feedbackReady, setFeedbackReady] = useState(false);
-  const [micPermissionGranted, setMicPermissionGranted] = useState<boolean | null>(null);
-  
-  // Add the missing state variables
-  const [jobRole, setJobRole] = useState<string>("");
-  const [industry, setIndustry] = useState<string>("");
-  const [experienceLevel, setExperienceLevel] = useState<string>("");
-  const [techStack, setTechStack] = useState<string[]>([]);
-  const [questionCount, setQuestionCount] = useState<number>(5);
-  const [additionalInfo, setAdditionalInfo] = useState<string>("");
-  const [isUserLoaded, setIsUserLoaded] = useState(false);
+  const [speechAnalysisCompleted, setSpeechAnalysisCompleted] = useState(false);
 
-  useEffect(() => {
-    const checkMicrophonePermission = async () => {
-      try {
-        const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-        setMicPermissionGranted(permissionStatus.state === 'granted');
-        
-        permissionStatus.onchange = () => {
-          setMicPermissionGranted(permissionStatus.state === 'granted');
-        };
-      } catch (err) {
-        console.error("Error checking microphone permission:", err);
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          stream.getTracks().forEach(track => track.stop());
-          setMicPermissionGranted(true);
-        } catch (err) {
-          console.error("Error accessing microphone:", err);
-          setMicPermissionGranted(false);
-        }
-      }
-    };
-    
-    checkMicrophonePermission();
-  }, []);
-
-  useEffect(() => {
-    if (location.state) {
-      const { jobRole: stateJobRole, industry: stateIndustry, experienceLevel: stateExperienceLevel, techStack: stateTechStack } = location.state;
-      if (stateJobRole) setJobRole(stateJobRole);
-      if (stateIndustry) setIndustry(stateIndustry);
-      if (stateExperienceLevel) setExperienceLevel(stateExperienceLevel);
-      if (stateTechStack) {
-        if (typeof stateTechStack === 'string') {
-          setTechStack(stateTechStack.split(',').map((item: string) => item.trim()));
-        } else if (Array.isArray(stateTechStack)) {
-          setTechStack(stateTechStack);
-        }
-      }
-    }
-  }, [location.state]);
+  const [jobRole, setJobRole] = useState("");
+  const [techStack, setTechStack] = useState("");
+  const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>("intermediate");
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUserId(user.uid);
+        
         try {
-          const userDocRef = doc(db, "users", user.uid);
-          const userDoc = await getDoc(userDocRef);
+          const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            const displayName = userData.displayName || user.displayName || "User";
-            setUserName(displayName);
-            
-            // Pre-fill preferences if available
-            if (userData.jobRole && !jobRole) setJobRole(userData.jobRole);
-            if (userData.techStack && techStack.length === 0) {
-              setTechStack(typeof userData.techStack === 'string' 
-                ? userData.techStack.split(',').map(item => item.trim())
-                : Array.isArray(userData.techStack) ? userData.techStack : []);
-            }
-            if (userData.experienceLevel && !experienceLevel) setExperienceLevel(userData.experienceLevel);
-            if (userData.industry && !industry) setIndustry(userData.industry);
-          } else {
-            setUserName(user.displayName || "User");
+            setUserName(userData.displayName || user.displayName || "");
+            if (userData.jobRole) setJobRole(userData.jobRole);
+            if (userData.techStack) setTechStack(userData.techStack);
+            if (userData.experienceLevel) setExperienceLevel(userData.experienceLevel);
+          } else if (user.displayName) {
+            setUserName(user.displayName);
           }
         } catch (err) {
           console.error("Error fetching user data:", err);
-          setError("Could not load user profile.");
-          setUserName(user.displayName || "User");
-        } finally {
-          setIsUserLoaded(true);
+          if (user.displayName) setUserName(user.displayName);
         }
-      } else {
-        setIsUserLoaded(true);
       }
     });
     
     return () => unsubscribe();
-  }, [jobRole, experienceLevel, industry, techStack]);
+  }, []);
 
-  const handleGenerateInterview = async (data: {
-    jobRole: string;
-    techStack: string[];
-    experienceLevel: string;
-    industry: string;
-    questionCount: number;
-    additionalInfo: string;
-  }) => {
-    if (!userId || !userName) {
-      toast.error("Please login to continue.");
-      setError("User authentication required.");
-      return;
-    }
-    
+  const handleGenerateInterview = async () => {
     setStage("generating");
     setIsGenerating(true);
     setError("");
-    setInterviewQuestions([]);
-    setInterviewId(null);
     
-    setJobRole(data.jobRole);
-    setTechStack(data.techStack);
-    setExperienceLevel(data.experienceLevel);
-    setIndustry(data.industry);
-    setQuestionCount(data.questionCount);
-    setAdditionalInfo(data.additionalInfo);
-
     try {
       const params: InterviewParams = {
         userId,
         userName,
-        jobRole: data.jobRole,
-        industry: data.industry,
-        experienceLevel: data.experienceLevel,
-        questionCount: data.questionCount,
-        techStack: data.techStack
+        jobRole,
+        techStack: techStack.split(',').map(item => item.trim()).filter(item => item.length > 0),
+        experienceLevel,
+        questionCount: 5
       };
-
+      
       console.log("Generating interview with params:", params);
       toast.info("Generating personalized interview questions...");
-
+      
       const { questions, interviewId: id } = await geminiGenerateQuestions(params);
-
+      
       console.log("Generated questions:", questions);
-      console.log("Interview ID:", id);
       toast.success("Interview questions generated successfully!");
-
+      
       setInterviewQuestions(questions);
       setInterviewId(id);
-      setAnswerFeedbacks(new Array(questions.length).fill(null));
-      setUserAnswers([]);
       setStage("ready");
     } catch (err) {
       console.error("Error generating questions:", err);
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      setError(`Failed to generate interview questions: ${errorMessage}`);
-      toast.error("Failed to generate interview questions. Please try again.");
       setStage("idle");
+      setError(`Failed to generate interview questions: ${err instanceof Error ? err.message : String(err)}`);
+      toast.error("Failed to generate interview questions. Please try again.");
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const analyzeUserAnswer = async (
-    questionIndex: number,
-    question: string,
-    answer: string,
-    responseTime?: number,
-    fillerWords?: string[],
-    hesitations?: number
-  ) => {
-    if (!interviewId) {
-      console.error("Cannot analyze answer without interviewId");
-      return;
-    }
-    
-    if (answerFeedbacks[questionIndex] !== null) {
-      console.log(`Feedback for question ${questionIndex + 1} already exists. Skipping analysis.`);
-      return;
-    }
-
-    try {
-      console.log(`Analyzing answer for question ${questionIndex + 1}...`);
-      toast.info(`Analyzing answer ${questionIndex + 1}...`);
-
-      const feedback = await analyzeAnswer(
-        question, 
-        answer, 
-        jobRole, 
-        experienceLevel, 
-        responseTime,
-        fillerWords,
-        hesitations
-      );
-
-      await saveAnswerFeedback(
-        interviewId,
-        userId,
-        questionIndex,
-        question,
-        answer,
-        feedback
-      );
-
-      console.log(`Feedback received for question ${questionIndex + 1}:`, feedback);
-      toast.success(`Feedback ready for question ${questionIndex + 1}!`);
-
-      setAnswerFeedbacks(prev => {
-        const newFeedbacks = [...prev];
-        newFeedbacks[questionIndex] = feedback;
-        return newFeedbacks;
-      });
-    } catch (err) {
-      console.error(`Error analyzing answer for question ${questionIndex + 1}:`, err);
-      toast.error(`Failed to get feedback for question ${questionIndex + 1}.`);
-    }
-  };
-
-  const requestMicrophonePermission = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach(track => track.stop());
-      setMicPermissionGranted(true);
-      toast.success("Microphone access granted!");
-      return true;
-    } catch (err) {
-      console.error("Error requesting microphone permission:", err);
-      setMicPermissionGranted(false);
-      setError("Microphone access denied. Please grant permission to continue.");
-      toast.error("Microphone access denied. Please grant permission in your browser settings.");
-      return false;
+  const handleExperienceLevelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === "beginner" || value === "intermediate" || value === "expert") {
+      setExperienceLevel(value);
     }
   };
 
   useEffect(() => {
     function onCallStart() {
-      console.log("Call started event received");
       setCallStatus(CallStatus.ACTIVE);
       setStage("calling");
       setError("");
-      setMessages([]);
-      setCurrentQuestionIndex(-1);
-      setFeedbackReady(false);
-      setLastMessage("Interview is starting...");
     }
-
+    
     function onCallEnd() {
-      console.log("Call ended event received");
       setCallStatus(CallStatus.FINISHED);
       setStage("analyzing");
-      setIsAnalyzing(true);
-      setLastMessage("Interview finished. Analyzing responses...");
-      toast.info("Interview ended. Analyzing your answers...");
+      setCallStatus(CallStatus.ANALYZING);
     }
-
-    async function onMessage(message: Message) {
-      console.log("Message received:", message);
-      
-      if (message?.role === 'assistant' || message?.role === 'user') {
-        setLastMessage(message.content);
-
-        setMessages(prev => [...prev, message]);
+    
+    async function onMessage(message: any) {
+      if (message?.type === "transcript" && message.transcriptType === "final") {
+        const newMessage = { role: message.role, content: message.transcript };
+        setMessages(prev => [...prev, newMessage]);
 
         if (message.role === 'assistant') {
-          setCurrentQuestionIndex(aiInterviewEngine.getCurrentQuestionIndex());
-          setInterimTranscript("");
+          setCurrentQuestionIndex(prevIndex => prevIndex + 1);
         } else if (message.role === 'user') {
-          setUserAnswers(prev => [...prev, message]);
+          setUserAnswers(prev => [...prev, message.transcript]);
           
-          const answerIndex = message.questionIndex ?? aiInterviewEngine.getCurrentQuestionIndex();
-          if (answerIndex >= 0 && answerIndex < interviewQuestions.length) {
-            const question = interviewQuestions[answerIndex];
-            analyzeUserAnswer(
-              answerIndex, 
-              question, 
-              message.content, 
-              message.responseTime,
-              message.fillerWords,
-              message.hesitations
-            );
+          const questionIdx = vapi.getCurrentQuestionIndex() - 1;
+          if (questionIdx >= 0 && questionIdx < interviewQuestions.length) {
+            const question = interviewQuestions[questionIdx];
+            analyzeUserAnswer(questionIdx, question, message.transcript);
           }
         }
       }
     }
-
-    function onInterimTranscript(data: { transcript: string }) {
-      console.log("Interim transcript:", data.transcript);
-      setInterimTranscript(data.transcript);
-    }
-
-    function onSpeechStart() {
-      console.log("AI Speech started");
-      setIsSpeaking(true);
-    }
     
-    function onSpeechEnd() {
-      console.log("AI Speech ended");
-      setIsSpeaking(false);
-    }
-    
+    function onSpeechStart() { setIsSpeaking(true); }
+    function onSpeechEnd() { setIsSpeaking(false); }
     function onError(err: any) {
-      const errorMsg = "Interview error: " + (err?.message || String(err));
-      console.error(errorMsg, err);
-      setError(errorMsg);
-      toast.error("An error occurred during the interview.");
+      setError("Call error: " + (err?.message || String(err)));
       setCallStatus(CallStatus.INACTIVE);
       setStage("ready");
-      setIsSpeaking(false);
-      setIsAnalyzing(false);
     }
 
-    aiInterviewEngine.on("call-start", onCallStart);
-    aiInterviewEngine.on("call-end", onCallEnd);
-    aiInterviewEngine.on("message", onMessage);
-    aiInterviewEngine.on("interim-transcript", onInterimTranscript);
-    aiInterviewEngine.on("speech-start", onSpeechStart);
-    aiInterviewEngine.on("speech-end", onSpeechEnd);
-    aiInterviewEngine.on("error", onError);
-    aiInterviewEngine.on("recognition-start", () => {
-      console.log("Speech recognition started successfully");
-      setError("");
-    });
+    vapi.on("call-start", onCallStart);
+    vapi.on("call-end", onCallEnd);
+    vapi.on("message", onMessage);
+    vapi.on("speech-start", onSpeechStart);
+    vapi.on("speech-end", onSpeechEnd);
+    vapi.on("error", onError);
 
     return () => {
-      aiInterviewEngine.off("call-start", onCallStart);
-      aiInterviewEngine.off("call-end", onCallEnd);
-      aiInterviewEngine.off("message", onMessage);
-      aiInterviewEngine.off("interim-transcript", onInterimTranscript);
-      aiInterviewEngine.off("speech-start", onSpeechStart);
-      aiInterviewEngine.off("speech-end", onSpeechEnd);
-      aiInterviewEngine.off("error", onError);
-      aiInterviewEngine.off("recognition-start", () => {});
-      
-      if (aiInterviewEngine.active) {
-        aiInterviewEngine.stop();
-      }
+      vapi.off("call-start", onCallStart);
+      vapi.off("call-end", onCallEnd);
+      vapi.off("message", onMessage);
+      vapi.off("speech-start", onSpeechStart);
+      vapi.off("speech-end", onSpeechEnd);
+      vapi.off("error", onError);
     };
-  }, [interviewQuestions, interviewId, userId, jobRole, experienceLevel]);
+  }, [interviewQuestions]);
+
+  const analyzeUserAnswer = async (
+    questionIndex: number, 
+    question: string, 
+    answer: string
+  ) => {
+    try {
+      console.log(`Analyzing answer for question ${questionIndex + 1}: ${question}`);
+      
+      const feedback = await analyzeAnswer(question, answer, jobRole, experienceLevel);
+      
+      await saveAnswerFeedback(
+        interviewId || 'unknown', 
+        userId, 
+        questionIndex, 
+        question, 
+        answer, 
+        feedback
+      );
+      
+      setAnswerFeedbacks(prev => {
+        const newFeedbacks = [...prev];
+        newFeedbacks[questionIndex] = feedback;
+        return newFeedbacks;
+      });
+      
+    } catch (err) {
+      console.error(`Error analyzing answer for question ${questionIndex + 1}:`, err);
+    }
+  };
 
   useEffect(() => {
-    if (
-      stage === "analyzing" && 
-      callStatus === CallStatus.FINISHED && 
-      userAnswers.length > 0 && 
-      userAnswers.length === answerFeedbacks.filter(fb => fb !== null).length
-    ) {
-      console.log("All feedback received. Calculating overall score.");
+    if (messages.length > 0) setLastMessage(messages[messages.length - 1].content);
+  }, [messages]);
 
-      const validFeedbacks = answerFeedbacks.filter(fb => fb !== null) as AnswerFeedback[];
-      const totalScore = validFeedbacks.reduce((sum, feedback) => sum + feedback.overallScore, 0);
-      const avgScore = validFeedbacks.length > 0 ? Math.round(totalScore / validFeedbacks.length) : 0;
-      setOverallScore(avgScore);
-
-      console.log("Overall Score:", avgScore);
-      setFeedbackReady(true);
-      setStage("feedback");
-      setIsAnalyzing(false);
-      toast.success("Analysis complete! View your feedback below.");
+  useEffect(() => {
+    if (callStatus === CallStatus.ANALYZING && answerFeedbacks.length > 0 && 
+        answerFeedbacks.length === interviewQuestions.length && 
+        userAnswers.length === interviewQuestions.length) {
+      
+      setTimeout(() => {
+        const totalScore = answerFeedbacks.reduce((sum, feedback) => sum + feedback.overallScore, 0);
+        const avgScore = Math.round(totalScore / answerFeedbacks.length);
+        setOverallScore(avgScore);
+        
+        setSpeechAnalysisCompleted(true);
+        setStage("feedback");
+        setCallStatus(CallStatus.FINISHED);
+      }, 1000);
     }
-  }, [stage, callStatus, answerFeedbacks, userAnswers]);
+  }, [callStatus, answerFeedbacks, interviewQuestions.length, userAnswers.length]);
 
   const handleStartCall = async () => {
-    if (interviewQuestions.length === 0 || !interviewId) {
-      setError("Questions not generated or interview ID missing.");
-      toast.error("Cannot start interview. Please generate questions first.");
-      return;
-    }
-    
-    if (micPermissionGranted === false) {
-      const granted = await requestMicrophonePermission();
-      if (!granted) return;
-    }
-    
     setError("");
     setCallStatus(CallStatus.CONNECTING);
     setStage("calling");
     setCurrentQuestionIndex(-1);
     setUserAnswers([]);
-    setAnswerFeedbacks(new Array(interviewQuestions.length).fill(null));
+    setAnswerFeedbacks([]);
     setMessages([]);
-    setFeedbackReady(false);
-    setOverallScore(0);
-    setLastMessage("Connecting...");
-    setInterimTranscript("");
-
+    setSpeechAnalysisCompleted(false);
+    
     try {
-      window.speechSynthesis.getVoices();
-      await aiInterviewEngine.start(interviewQuestions, {
-        userName,
-        userId,
-        jobRole,
-        industry,
-        experienceLevel,
-        techStack
+      const formattedQuestions = interviewQuestions?.map(q => `- ${q}`).join("\n") || "";
+      await vapi.start(interviewer.id, {
+        variableValues: {
+          questions: formattedQuestions,
+          username: userName,
+          userid: userId,
+          jobRole,
+          techStack,
+          experienceLevel
+        },
       });
     } catch (err) {
-      console.error("Failed to start interview:", err);
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      setError(`Failed to start interview: ${errorMsg}`);
-      toast.error("Failed to start interview. Please check microphone permissions.");
+      setError("Failed to start interview. Check your API/service keys.");
       setCallStatus(CallStatus.INACTIVE);
       setStage("ready");
     }
   };
 
   const handleDisconnect = () => {
-    console.log("User initiated disconnect.");
-    aiInterviewEngine.stop();
+    setCallStatus(CallStatus.ANALYZING);
+    vapi.stop();
   };
 
-  const handleResetMicrophone = () => {
-    if (callStatus === CallStatus.ACTIVE) {
-      aiInterviewEngine.resetRecognition();
-      toast.info("Resetting microphone connection...");
-    }
-  };
-
-  const handleViewDetailedFeedback = async () => {
-    setStage("done");
-    toast.info("Preparing detailed feedback report...");
-    
+  const handleViewFeedback = async () => {
     try {
-      const feedbackParams = {
-        interviewId: interviewId || "",
+      const { success, feedbackId: id } = await createFeedback({
+        interviewId,
         userId,
-        feedbackId: "",
         transcript: messages,
-      };
-
-      const { success, feedbackId } = await createFeedback(feedbackParams);
-
-      if (success && interviewId) {
-        console.log("Navigating to detailed feedback page");
+        feedbackId,
+      });
+      
+      if (success && id && interviewId) {
         navigate(`/interview/${interviewId}/feedback`);
       } else {
-        throw new Error("Failed to record feedback session.");
+        toast.error("Failed to generate detailed feedback");
+        navigate("/");
       }
     } catch (err) {
-      console.error("Error preparing or navigating to feedback:", err);
-      toast.error("Could not load detailed feedback page.");
-      setStage("feedback");
-    }
-  };
-
-  const renderContent = () => {
-    switch (stage) {
-      case "idle":
-        return (
-          <div className="flex flex-col gap-4 w-full">
-            <h3 className="font-medium text-lg mb-1 text-center">Interview Preferences</h3>
-            {!userId && <p className="text-center text-destructive">Loading user info...</p>}
-            {userId && <p className="text-center text-muted-foreground mb-4">Welcome, {userName}!</p>}
-
-            <InterviewPreparationForm
-              onGenerateInterview={handleGenerateInterview}
-              isGenerating={isGenerating}
-              userName={userName}
-              initialValues={{
-                jobRole,
-                techStack: techStack.join(', '),
-                experienceLevel,
-                industry
-              }}
-            />
-          </div>
-        );
-        
-      case "generating":
-        return (
-          <div className="flex flex-col items-center justify-center py-8">
-            <Loader className="animate-spin w-12 h-12 text-primary mb-4" />
-            <p className="text-muted-foreground">Generating personalized interview questions...</p>
-            <p className="text-xs text-muted-foreground mt-2">Creating questions for {jobRole} role with {techStack.join(', ')} expertise...</p>
-          </div>
-        );
-
-      case "ready":
-        return (
-          <div className="w-full flex flex-col gap-6 items-center animate-fade-in">
-            <Card className="w-full border-0 bg-gradient-to-br from-background via-muted/50 to-background dark:from-gray-800 dark:to-gray-900 shadow-md">
-              <CardHeader className="flex flex-row items-center gap-4 pb-2">
-                <MessageSquare className="w-7 h-7 text-primary" />
-                <CardTitle className="font-medium text-xl">Your AI Interview is Ready</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-3">
-                  Based on your preferences ({jobRole}, {experienceLevel}), here are your interview questions:
-                </p>
-                <ol className="list-decimal pl-5 space-y-2 text-sm">
-                  {interviewQuestions.length > 0 ? (
-                    interviewQuestions.map((q, i) => (
-                      <li key={i} className="mb-1 p-1 rounded">{q}</li>
-                    ))
-                  ) : (
-                    <div className="text-center p-4 text-muted-foreground italic">
-                      No questions generated. Please try again.
-                    </div>
-                  )}
-                </ol>
-                <p className="text-xs text-muted-foreground mt-4 italic">Interview ID: {interviewId}</p>
-              </CardContent>
-            </Card>
-            
-            {micPermissionGranted === false && (
-              <div className="w-full bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 p-4 rounded-md text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-                <div>
-                  <p className="font-medium">Microphone permission required</p>
-                  <p className="text-sm mt-1">Please allow microphone access to start the interview.</p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="mt-2 bg-yellow-200 dark:bg-yellow-800 border-yellow-300 dark:border-yellow-700"
-                    onClick={requestMicrophonePermission}
-                  >
-                    Grant microphone access
-                  </Button>
-                </div>
-              </div>
-            )}
-            
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white w-full max-w-md mx-auto"
-              onClick={handleStartCall}
-              disabled={interviewQuestions.length === 0 || callStatus === CallStatus.CONNECTING || micPermissionGranted === false}
-            >
-              {callStatus === CallStatus.CONNECTING ? (
-                <> <Loader className="animate-spin mr-2 w-4 h-4" /> Connecting... </>
-              ) : (
-                <> <Play className="mr-2 w-5 h-5" /> Start Interview </>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setStage("idle")}
-              disabled={callStatus === CallStatus.CONNECTING}
-            >
-              Change Preferences
-            </Button>
-          </div>
-        );
-
-      case "calling":
-        return (
-          <>
-            <InterviewSession
-                    currentQuestionIndex={currentQuestionIndex}
-                    interviewQuestions={interviewQuestions}
-                    lastMessage={lastMessage}
-                    isSpeaking={isSpeaking}
-                    userName={userName}
-                    jobRole={jobRole}
-                    interimTranscript={interimTranscript}
-                    onEndInterview={handleDisconnect}
-                    isActive={callStatus === CallStatus.ACTIVE} messages={[]}            />
-            
-            {callStatus === CallStatus.ACTIVE && (
-              <div className="mt-4 flex justify-center">
-                <Button 
-                  variant="outline"
-                  size="sm"
-                  onClick={handleResetMicrophone}
-                  className="text-xs"
-                >
-                  Reset Microphone
-                </Button>
-              </div>
-            )}
-          </>
-        );
-
-      case "analyzing":
-        return (
-          <div className="w-full flex flex-col items-center gap-4 animate-fade-in text-center py-8">
-            <div className="text-xl font-semibold mb-2">Analyzing Responses</div>
-            <Loader className="animate-spin w-12 h-12 text-primary mb-4" />
-            <p className="text-muted-foreground max-w-md">
-              Please wait while the AI analyzes your answers based on clarity, relevance, confidence, and other factors. This may take a moment...
-            </p>
-            <div className="w-full max-w-sm bg-muted rounded-full h-2.5 dark:bg-gray-700 mt-4">
-              <div className="bg-primary h-2.5 rounded-full animate-pulse" 
-                style={{ width: `${(answerFeedbacks.filter(fb => fb !== null).length / userAnswers.length) * 100}%` }}
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Analyzed {answerFeedbacks.filter(fb => fb !== null).length} of {userAnswers.length} answers.
-            </p>
-          </div>
-        );
-
-      case "feedback":
-        return (
-          <div className="w-full flex flex-col items-center gap-6 animate-fade-in">
-            <div className="flex flex-col items-center justify-center w-full bg-gradient-to-r from-background via-muted/30 to-background p-6 rounded-lg shadow-md mb-4 border">
-              <div className="text-sm font-medium text-muted-foreground mb-1 uppercase tracking-wider">Overall Performance</div>
-              <div className={cn("text-5xl font-bold mb-2",
-                overallScore >= 8 ? "text-green-600 dark:text-green-400" :
-                overallScore >= 5 ? "text-amber-600 dark:text-amber-400" :
-                                    "text-red-600 dark:text-red-400"
-              )}>
-                {overallScore} / 10
-              </div>
-              <p className="text-sm text-muted-foreground text-center max-w-sm">
-                This score reflects an average of your performance across all questions based on relevance, clarity, and confidence.
-              </p>
-            </div>
-
-            <div className="w-full space-y-4">
-              <div className="flex items-center mb-2">
-                <BarChart className="w-5 h-5 text-primary mr-2" />
-                <h3 className="text-xl font-semibold">Detailed Answer Feedback</h3>
-              </div>
-
-              {userAnswers.map((userAnswer, index) => {
-                if (!userAnswer.questionIndex && userAnswer.questionIndex !== 0) return null;
-                
-                const question = interviewQuestions[userAnswer.questionIndex];
-                const feedback = answerFeedbacks[userAnswer.questionIndex];
-                
-                if (question && feedback) {
-                  return (
-                    <AnswerFeedbackCard
-                      key={index}
-                      question={question}
-                      answer={userAnswer.content}
-                      feedback={feedback}
-                      questionNumber={userAnswer.questionIndex + 1}
-                    />
-                  );
-                } else if (question) {
-                  return (
-                    <Card key={index} className="w-full mb-4 shadow-sm border-dashed border-muted-foreground/50 opacity-70">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base font-medium text-muted-foreground">
-                          Question {userAnswer.questionIndex + 1}: {question}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground italic">
-                          Feedback analysis pending...
-                        </p>
-                      </CardContent>
-                    </Card>
-                  );
-                }
-                return null;
-              })}
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 w-full mt-4">
-              <Button
-                variant="outline"
-                size="lg"
-                className="w-full sm:w-1/2"
-                onClick={() => {
-                  setStage("ready");
-                  setCallStatus(CallStatus.INACTIVE);
-                  setError('');
-                }}
-              >
-                Try This Interview Again
-              </Button>
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-primary to-primary/80 text-white w-full sm:w-1/2"
-                onClick={handleViewDetailedFeedback}
-              >
-                View Full Report & Transcript
-              </Button>
-            </div>
-            <Button
-              variant="link"
-              size="sm"
-              className="mt-2 text-muted-foreground"
-              onClick={() => {
-                setStage("idle");
-                setCallStatus(CallStatus.INACTIVE);
-                setError('');
-                setInterviewQuestions([]);
-                setInterviewId(null);
-              }}
-            >
-              Start a New Interview
-            </Button>
-          </div>
-        );
-
-      case "done":
-        return (
-          <div className="w-full flex flex-col items-center gap-4 animate-fade-in text-center py-8">
-            <Check className="w-16 h-16 text-green-500 drop-shadow-lg mb-3" />
-            <div className="text-xl font-semibold">Processing Complete!</div>
-            <div className="text-muted-foreground mb-4">
-              Redirecting you to the detailed feedback report...
-            </div>
-            <Loader className="animate-spin w-8 h-8 text-primary" />
-          </div>
-        );
-
-      default:
-        return <div>Loading...</div>;
+      console.error("Error generating feedback:", err);
+      toast.error("Failed to generate detailed feedback");
+      navigate("/");
     }
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-background via-muted/30 to-background dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-16 flex items-start justify-center overflow-auto px-4">
+    <div className="relative min-h-screen bg-gradient-to-br from-background via-muted to-background dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-16 flex items-center justify-center overflow-auto px-4">
       <DashboardNav />
-      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute -left-24 top-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse opacity-50" />
-        <div className="absolute -right-10 bottom-20 w-80 h-80 bg-secondary/10 rounded-full blur-3xl animate-pulse opacity-40" />
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <div className="absolute left-24 top-10 w-48 h-48 bg-primary/30 rounded-full blur-3xl animate-spin-slow" />
+        <div className="absolute right-10 bottom-20 w-80 h-80 bg-primary/20 rounded-full blur-2xl" />
       </div>
-
-      <Card className="relative z-10 max-w-3xl w-full shadow-xl border-0 bg-card/80 dark:bg-gray-800/90 backdrop-blur-lg mt-16 mb-8 animate-fade-in">
-        <CardHeader className="flex flex-col items-center gap-3 bg-gradient-to-r from-primary/5 to-background/0 rounded-t-lg pt-8 pb-6 border-b">
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" className="px-3 py-1 border-primary/30 bg-primary/10 text-primary dark:text-primary shadow-sm">
-              <Mic className="w-4 h-4 mr-1.5" />
-              AI Voice Interview
+      <Card className="relative z-10 max-w-2xl w-full shadow-xl border-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl mt-16">
+        <CardHeader className="flex flex-col items-center gap-2 bg-gradient-to-r from-primary/30 to-background/10 rounded-t-xl pt-8">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="px-3 py-1 bg-gradient-to-r from-primary/30 to-primary/20 border-none text-primary dark:text-primary shadow-md">
+              <Mic className="w-4 h-4 mr-1" />
+              Smart AI Interview
             </Badge>
-            <Badge variant="secondary" className="px-3 py-1 bg-muted text-muted-foreground dark:text-white shadow-sm">
-              <Video className="w-4 h-4 mr-1.5" />
-              Speech Analysis
+            <Badge variant="secondary" className="px-3 py-1 bg-muted text-muted-foreground dark:text-white">
+              <Video className="w-4 h-4 mr-1" />
+              Vapi + Gemini
             </Badge>
           </div>
-          <CardTitle className="text-2xl md:text-3xl font-semibold mt-2 text-center">
-            { stage === 'calling' ? 'Interview in Progress' :
-              stage === 'feedback' ? 'Interview Feedback' :
-              'Personalized AI Interview Practice'
-            }
+          <CardTitle className="text-2xl md:text-3xl font-semibold mt-1 text-center">
+            Personalized AI Interview Generator
           </CardTitle>
-          <CardDescription className="text-center max-w-lg text-muted-foreground text-sm md:text-base">
-            { stage === 'idle' ? 'Define your target role and skills to generate a tailored practice interview.' :
-              stage === 'ready' ? 'Review the generated questions and start when ready.' :
-              stage === 'calling' ? 'Listen to the AI interviewer and respond clearly.' :
-              stage === 'analyzing' ? 'Your responses are being analyzed for detailed feedback.' :
-              stage === 'feedback' ? 'Review your performance score and feedback for each question.' :
-              'Ace your next interview with AI-powered practice and insights.'
-            }
+          <CardDescription className="text-center max-w-lg text-muted-foreground dark:text-muted-foreground">
+            Generate, join, and ace your practice interview! Powered by state-of-the-art AI for realistic Q&A and instant feedback.
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="flex flex-col items-center py-8 px-4 md:px-8 space-y-6 min-h-[300px]">
+        <CardContent className="flex flex-col items-center py-8 space-y-6">
           {error && (
-            <div className="w-full px-4 py-3 bg-destructive/10 text-destructive rounded-md text-center font-medium shadow border border-destructive/20 mb-4 flex items-center justify-center gap-2">
-              <AlertCircle className="h-5 w-5" />
-              <span>{error}</span>
+            <div className="w-full px-3 py-2 bg-destructive/20 text-destructive rounded-md text-center font-medium shadow border border-destructive/20 mb-2">
+              <AlertCircle className="h-4 w-4 inline-block mr-1" />
+              {error}
             </div>
           )}
 
-          {renderContent()}
-        </CardContent>
+          {!userName || !userId ? (
+            <div className="flex flex-col gap-4 w-full items-center">
+              <label className="font-medium text-lg mb-1">Enter your details to begin:</label>
+              <Input
+                className="w-full md:w-2/3"
+                placeholder="Your Name"
+                value={userName}
+                onChange={e => setUserName(e.target.value)}
+                required
+              />
+              <Input
+                className="w-full md:w-2/3"
+                placeholder="Your User ID"
+                value={userId}
+                onChange={e => setUserId(e.target.value)}
+                required
+              />
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-primary to-primary/80 text-white w-full md:w-2/3 mt-2"
+                onClick={handleGenerateInterview}
+                disabled={!userName || !userId || isGenerating}
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader className="animate-spin mr-2 w-4 h-4" /> Generating...
+                  </>
+                ) : "Create Interview"}
+              </Button>
+            </div>
+          ) : stage === "idle" ? (
+            <div className="flex flex-col gap-4 w-full">
+              <h3 className="font-medium text-lg mb-1">Enter interview preferences:</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="jobRole" className="text-sm font-medium block mb-1">Job Role</label>
+                  <Input
+                    id="jobRole"
+                    placeholder="e.g. Frontend Developer"
+                    value={jobRole}
+                    onChange={e => setJobRole(e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="techStack" className="text-sm font-medium block mb-1">Tech Stack (comma separated)</label>
+                  <Input
+                    id="techStack"
+                    placeholder="e.g. React, TypeScript, Node.js"
+                    value={techStack}
+                    onChange={e => setTechStack(e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="experienceLevel" className="text-sm font-medium block mb-1">Experience Level</label>
+                  <select
+                    id="experienceLevel"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                    value={experienceLevel}
+                    onChange={handleExperienceLevelChange}
+                  >
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="expert">Expert</option>
+                  </select>
+                </div>
+              </div>
+              
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-primary to-primary/80 text-white w-full mt-4"
+                onClick={handleGenerateInterview}
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader className="animate-spin mr-2 w-4 h-4" /> Generating...
+                  </>
+                ) : "Generate Interview Questions"}
+              </Button>
+            </div>
+          ) : stage === "generating" ? (
+            <div className="flex flex-col items-center justify-center py-8">
+              <Loader className="animate-spin w-12 h-12 text-primary mb-4" />
+              <p className="text-muted-foreground">Generating personalized interview questions...</p>
+            </div>
+          ) : null}
 
-        <CardFooter className="flex justify-center text-xs text-muted-foreground font-mono bg-muted/30 py-3 border-t">
-          Powered by Gemini AI & Web Speech API
+          {stage === "ready" && (
+            <div className="w-full flex flex-col gap-6 items-center">
+              <Card className="w-full border-0 bg-gradient-to-br from-background via-muted to-background dark:from-gray-800 dark:to-gray-900">
+                <CardHeader className="flex flex-row items-center gap-4">
+                  <MessageSquare className="w-7 h-7 text-primary" />
+                  <CardTitle className="font-medium">Your AI-Generated Interview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+                    {interviewQuestions.length > 0 ? (
+                      interviewQuestions.map((q, i) => (
+                        <li key={i} className="mb-2 py-1">{q}</li>
+                      ))
+                    ) : (
+                      <div className="text-center p-4 text-muted-foreground italic">
+                        No questions generated yet. Please try again.
+                      </div>
+                    )}
+                  </ol>
+                </CardContent>
+              </Card>
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-primary to-primary/80 text-white w-full"
+                onClick={handleStartCall}
+                disabled={interviewQuestions.length === 0}
+              >
+                <Play className="mr-2 w-4 h-4" /> Start Interview
+              </Button>
+            </div>
+          )}
+
+          {stage === "calling" && (
+            <div className="w-full flex flex-col gap-6 items-center animate-fade-in">
+              <div className="flex items-center justify-center gap-8 mb-2">
+                <div className="flex flex-col items-center bg-primary/10 px-6 py-4 rounded-xl border border-primary/10 shadow">
+                  <div className="relative">
+                    <div className={cn("h-14 w-14 rounded-full border-2 shadow flex items-center justify-center bg-muted", 
+                      isSpeaking ? "ring-4 ring-primary/40" : "")}>
+                      <Mic className="h-8 w-8 text-primary" />
+                    </div>
+                    {isSpeaking && <span className="absolute right-1 bottom-1 block w-4 h-4 rounded-full bg-green-400 animate-pulse ring-2 ring-white" />}
+                  </div>
+                  <div className="font-medium mt-2 text-primary">AI Interviewer</div>
+                </div>
+                <div className="flex flex-col items-center bg-muted px-6 py-4 rounded-xl border border-muted shadow">
+                  <div className="relative">
+                    <User className="h-14 w-14 rounded-full bg-muted border-2 border-muted-foreground text-muted-foreground p-2" />
+                  </div>
+                  <div className="font-medium mt-2 text-muted-foreground">{userName}</div>
+                </div>
+              </div>
+              
+              {currentQuestionIndex >= 0 && currentQuestionIndex < interviewQuestions.length && (
+                <div className="w-full">
+                  <Badge variant="outline" className="mb-2">
+                    Question {currentQuestionIndex + 1} of {interviewQuestions.length}
+                  </Badge>
+                  <div className="font-medium mb-2">{interviewQuestions[currentQuestionIndex]}</div>
+                </div>
+              )}
+              
+              <div className="w-full bg-muted rounded-lg p-4 min-h-[60px] text-center shadow transition-all duration-500">
+                <span className="text-muted-foreground">
+                  {lastMessage || <span className="italic">Speak when you see the microphone light up...</span>}
+                </span>
+              </div>
+              <div className="flex gap-4 mt-4 justify-center">
+                {callStatus !== CallStatus.ACTIVE ? (
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-primary to-primary/80 text-white px-8 py-2 text-lg relative"
+                    onClick={handleStartCall}
+                    disabled={callStatus === CallStatus.CONNECTING}
+                  >
+                    {callStatus === CallStatus.CONNECTING ? (<Loader className="animate-spin mr-2 w-4 h-4" />) : (<Play className="mr-2 w-4 h-4" />)}
+                    {callStatus === CallStatus.INACTIVE ? "Call" : "Connecting..."}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="destructive"
+                    size="lg"
+                    className="px-8 py-2 text-lg"
+                    onClick={handleDisconnect}
+                  >
+                    <ArrowDown className="mr-2 w-5 h-5" /> End Interview
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {stage === "analyzing" && (
+            <div className="w-full flex flex-col items-center gap-4 animate-fade-in">
+              <div className="text-xl font-semibold">Analyzing your responses...</div>
+              <Loader className="animate-spin w-10 h-10 text-primary mb-2" />
+              <div className="w-full bg-muted rounded-lg p-4 text-center">
+                <span className="text-muted-foreground">
+                  Our AI is analyzing your speech patterns, clarity, relevance, and more...
+                </span>
+              </div>
+            </div>
+          )}
+
+          {stage === "feedback" && speechAnalysisCompleted && (
+            <div className="w-full flex flex-col items-center gap-6 animate-fade-in">
+              <div className="flex items-center justify-center w-full bg-gradient-to-r from-background to-muted p-4 rounded-lg shadow-sm mb-2">
+                <div className="flex flex-col items-center">
+                  <div className="text-2xl font-bold mb-1">Overall Score</div>
+                  <div className={cn("text-4xl font-bold", 
+                    overallScore >= 8 ? "text-green-500" : 
+                    overallScore >= 6 ? "text-amber-500" : 
+                    "text-red-500"
+                  )}>
+                    {overallScore}/10
+                  </div>
+                </div>
+              </div>
+              
+              <div className="w-full space-y-2">
+                <div className="flex items-center mb-2">
+                  <BarChart className="w-5 h-5 text-primary mr-2" />
+                  <h3 className="text-lg font-semibold">Detailed Feedback</h3>
+                </div>
+                
+                {userAnswers.map((answer, index) => (
+                  index < interviewQuestions.length && answerFeedbacks[index] ? (
+                    <AnswerFeedbackCard
+                      key={index}
+                      question={interviewQuestions[index]}
+                      answer={answer}
+                      feedback={answerFeedbacks[index]}
+                      questionNumber={index + 1}
+                    />
+                  ) : null
+                ))}
+              </div>
+              
+              <div className="flex gap-4 w-full">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-1/2"
+                  onClick={() => setStage("ready")}
+                >
+                  Try Again
+                </Button>
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-primary to-primary/80 text-white w-1/2"
+                  onClick={handleViewFeedback}
+                >
+                  Get Detailed AI Feedback
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {stage === "done" && (
+            <div className="w-full flex flex-col items-center gap-4 animate-fade-in">
+              <Check className="w-12 h-12 text-green-500 drop-shadow" />
+              <div className="text-xl font-semibold">Interview complete!</div>
+              <div className="text-muted-foreground text-center">
+                Generating feedback... <Loader className="inline animate-spin w-6 h-6" />
+              </div>
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="flex justify-end text-xs text-muted-foreground font-mono">
+          powered by Vapi + Gemini AI
         </CardFooter>
       </Card>
     </div>

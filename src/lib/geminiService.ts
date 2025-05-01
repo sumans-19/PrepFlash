@@ -1,3 +1,4 @@
+import { VoiceMetrics } from './voiceAnalysis';
 
 export interface InterviewParams {
   userId: string;
@@ -14,21 +15,20 @@ export interface GenerateQuestionsResponse {
   interviewId: string;
 }
 
-export interface AnswerFeedback {
-  clarity: number; // 1-10
-  relevance: number; // 1-10
-  completeness: number; // 1-10
+export interface AnswerAnalysis {
+  clarity: number;
+  relevance: number;
+  completeness: number;
   fillerWordsCount: number;
   fillerWords: string[];
-  confidenceLevel: number; // 1-10
+  confidenceLevel: number;
   suggestions: string[];
-  overallScore: number; // 1-10
-  responseTime?: number; // in seconds (optional)
-  responseTimeScore?: number; // 1-10 (optional)
+  overallScore: number;
+  responseTime?: number;
+  responseTimeScore?: number;
+  voiceMetrics?: VoiceMetrics;
 }
 
-// Mock implementation for development and testing
-// In a real application, this would connect to Gemini API
 export const geminiGenerateQuestions = async (
   params: InterviewParams
 ): Promise<GenerateQuestionsResponse> => {
@@ -105,16 +105,16 @@ export const geminiGenerateQuestions = async (
   };
 };
 
-// Mock implementation for answer analysis
 export const analyzeAnswer = async (
-  question: string, 
-  answer: string, 
-  jobRole: string, 
-  experienceLevel: string, 
-  responseTime?: number, 
-  fillerWords?: string[], 
-  hesitations?: number
-): Promise<AnswerFeedback> => {
+  question: string,
+  answer: string,
+  jobRole: string,
+  experienceLevel: string,
+  responseTime?: number,
+  fillerWords?: string[],
+  hesitations?: number,
+  voiceMetrics?: VoiceMetrics
+): Promise<AnswerAnalysis> => {
   console.log(`Analyzing answer for question: "${question.substring(0, 30)}..."`);
   console.log(`Answer (${answer.length} chars): "${answer.substring(0, 50)}..."`);
   
@@ -237,7 +237,7 @@ export const analyzeAnswer = async (
     }, 0) / weightSum
   );
   
-  return {
+  const feedback = {
     clarity,
     relevance,
     completeness,
@@ -247,18 +247,44 @@ export const analyzeAnswer = async (
     suggestions,
     overallScore,
     responseTime,
-    responseTimeScore
+    responseTimeScore,
+    voiceMetrics
   };
+
+  // Add voice metrics analysis
+  if (voiceMetrics) {
+    const voiceConfidenceScore = Math.round(voiceMetrics.confidence * 10);
+    const voiceClarityScore = Math.round(voiceMetrics.clarity * 10);
+    
+    // Adjust confidence level based on voice metrics
+    feedback.confidenceLevel = Math.round(
+      (feedback.confidenceLevel + voiceConfidenceScore) / 2
+    );
+    
+    // Adjust clarity score based on voice metrics
+    feedback.clarity = Math.round(
+      (feedback.clarity + voiceClarityScore) / 2
+    );
+    
+    // Add voice-specific suggestions
+    if (voiceMetrics.volume < 0.3) {
+      feedback.suggestions.push("Try speaking a bit louder to project more confidence.");
+    }
+    if (voiceMetrics.clarity < 0.5) {
+      feedback.suggestions.push("Focus on speaking more clearly and enunciating your words.");
+    }
+  }
+
+  return feedback;
 };
 
-// Mock implementation to save answer feedback
 export const saveAnswerFeedback = async (
   interviewId: string,
   userId: string,
   questionIndex: number,
   question: string,
   answer: string,
-  feedback: AnswerFeedback
+  feedback: AnswerAnalysis
 ): Promise<void> => {
   console.log(`Saving feedback for question ${questionIndex + 1}`);
   console.log('Feedback data:', { interviewId, userId, questionIndex, feedback });

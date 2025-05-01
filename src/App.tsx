@@ -16,7 +16,13 @@ import ProfileSetup from "./components/ProfileSetup";
 import ProfileDisplay from "./components/ProfileDisplay";
 import Dashboard from "./pages/Dashboard";
 import ChatPractice from "./pages/ChatPractice";
+import AptitudeBrushUp from "./pages/AptitudeBrushUp";
+import AptitudeHome from "./pages/AptitudeHome";
+import ProjectZone from "./pages/ProjectHome";
 import { Features } from "./pages/Features";
+
+import CommunityPage from "./pages/CommunityPage";
+// import ProfilePage from "./pages/ProfilePage";
 import React from "react";
 
 const queryClient = new QueryClient();
@@ -36,13 +42,17 @@ const App = () => {
             <Route path="/voice-practice" element={<Interview />} />
             <Route path="/voice-practices" element={<InterviewPages />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/interview/feedback" element={<FeedbackPage />} />
-            <Route path="/interview/:interviewId/feedback" element={<FeedbackPage />} />
+            <Route path="/interview-feedback" element={<FeedbackPage />} />
             <Route path="/chat-practices" element={<ChatPractice />} />
             <Route path="/features" element={<Features />} />
+            <Route path="/projects" element={<ProjectZone />} />
             <Route path="/profile" element={<ProfileDisplay />} />
-            <Route path="/aptitude-question-bank" element={<AptitudeQuestionBank />} />
-            <Route path="/aptitude" element={<AptitudeQuestionBank />} />
+            {/* <Route path="/profiles" element={<ProfilePage />} /> */}
+            <Route path="/aptitude-brush-up" element={<AptitudeBrushUp />} />
+
+            <Route path="/community" element={<CommunityPage />} />
+            <Route path="/aptitude-questions" element={<AptitudeQuestionBank />} />
+            <Route path="/aptitudehome" element={<AptitudeHome />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>

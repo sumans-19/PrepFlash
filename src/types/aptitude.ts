@@ -9,6 +9,8 @@ export interface Formula {
   }
   
   export interface AptitudeQuestion {
+    attemptedAt: any;
+    isAttempted: unknown;
     id: string;
     question: string;
     options?: string[];

@@ -1,4 +1,5 @@
 import { EventEmitter } from './eventEmitter';
+import { VoiceAnalyzer, VoiceMetrics } from './voiceAnalysis';
 
 export interface Message {
   role: "assistant" | "user";
@@ -7,18 +8,18 @@ export interface Message {
   responseTime?: number;
   fillerWords?: string[];
   hesitations?: number;
+  voiceMetrics?: VoiceMetrics;
 }
 
 export interface InterviewConfig {
   userName: string;
   userId: string;
   jobRole?: string;
-  industry?: string; 
+  industry?: string;
   experienceLevel?: string;
   techStack?: string[];
 }
 
-// AI Interview Engine that handles speech recognition and synthesis
 class InterviewEngine extends EventEmitter {
   private questions: string[] = [];
   private currentQuestionIndex: number = -1;
@@ -29,31 +30,32 @@ class InterviewEngine extends EventEmitter {
   private userIsResponding: boolean = false;
   private config: InterviewConfig | null = null;
   private voicesLoaded: boolean = false;
-  private fillerWords: string[] = ['um', 'uh', 'like', 'you know', 'actually', 'basically', 'literally', 'sort of', 'kind of', 'right', 'really'];
+  private voiceAnalyzer: VoiceAnalyzer;
+  private analysisInterval: number | null = null;
+  private fillerWords: string[] = [
+    'um', 'uh', 'like', 'you know', 'actually', 'basically', 'literally',
+    'sort of', 'kind of', 'right', 'really', 'just', 'well', 'so'
+  ];
   private hesitationCount: number = 0;
   private silenceTimer: number | null = null;
   private lastSpeechTimestamp: number = 0;
-  private minSilenceForHesitation: number = 1000; // 1 second of silence counts as hesitation
-  
+  private minSilenceForHesitation: number = 1000;
+
   constructor() {
     super();
     this.speechSynthesis = window.speechSynthesis;
+    this.voiceAnalyzer = new VoiceAnalyzer();
     
-    // Load voices as soon as possible
-    this.loadVoices();
-    
-    // Listen for voiceschanged event to ensure voices are loaded
     if (speechSynthesis.onvoiceschanged !== undefined) {
       speechSynthesis.onvoiceschanged = this.loadVoices.bind(this);
     }
     
     this.initializeSpeechRecognition();
   }
-  
+
   private initializeSpeechRecognition(): void {
     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognitionClass = window.SpeechRecognition || 
-                                   window.webkitSpeechRecognition;
+      const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
       this.recognition = new SpeechRecognitionClass();
       
       if (this.recognition) {
@@ -61,64 +63,74 @@ class InterviewEngine extends EventEmitter {
         this.recognition.interimResults = true;
         this.recognition.lang = 'en-US';
         
-        this.recognition.onstart = () => {
-          console.log('Speech recognition started');
-          this.emit('recognition-start');
-        };
-        
-        this.recognition.onend = () => {
-          console.log('Speech recognition ended');
-          if (this.isActive) {
-            try {
-              // Add a small delay before restarting
-              setTimeout(() => {
-                if (this.isActive) {
-                  this.recognition?.start();
-                  console.log('Speech recognition restarted');
-                }
-              }, 300);
-            } catch (e) {
-              console.error('Failed to restart speech recognition:', e);
-            }
-          }
-        };
-        
-        this.recognition.onresult = this.handleSpeechResult.bind(this);
-        
-        this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-          console.error('Speech recognition error:', event.error, event.message);
-          
-          // Only emit error for critical issues
-          if (event.error !== 'no-speech' && event.error !== 'audio-capture') {
-            this.emit('error', { message: `Speech recognition error: ${event.error}` });
-          }
-          
-          // Try to recover from certain errors
-          if (event.error === 'network' || event.error === 'service-not-allowed') {
-            setTimeout(() => this.resetRecognition(), 1000);
-          }
-        };
+        this.setupRecognitionHandlers();
       }
     }
   }
-  
+
+  private setupRecognitionHandlers(): void {
+    if (!this.recognition) return;
+
+    this.recognition.onstart = () => {
+      console.log('Speech recognition started');
+      this.emit('recognition-start');
+      this.startVoiceAnalysis();
+    };
+
+    this.recognition.onend = () => {
+      console.log('Speech recognition ended');
+      if (this.isActive) {
+        setTimeout(() => {
+          if (this.isActive) {
+            this.recognition?.start();
+          }
+        }, 300);
+      }
+    };
+
+    this.recognition.onresult = this.handleSpeechResult.bind(this);
+    
+    this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      if (event.error !== 'no-speech') {
+        console.error('Speech recognition error:', event);
+        this.emit('error', { message: `Speech recognition error: ${event.error}` });
+      }
+    };
+  }
+
+  private startVoiceAnalysis(): void {
+    this.voiceAnalyzer.start().catch(console.error);
+    
+    this.analysisInterval = window.setInterval(() => {
+      if (this.userIsResponding) {
+        const metrics = this.voiceAnalyzer.analyze();
+        this.emit('voice-metrics', metrics);
+      }
+    }, 100) as unknown as number;
+  }
+
+  private stopVoiceAnalysis(): void {
+    if (this.analysisInterval) {
+      clearInterval(this.analysisInterval);
+      this.analysisInterval = null;
+    }
+    this.voiceAnalyzer.stop();
+  }
+
   private handleSpeechResult(event: SpeechRecognitionEvent): void {
     this.lastSpeechTimestamp = Date.now();
     
-    // Clear any existing silence timer when we hear speech
     if (this.silenceTimer !== null) {
       window.clearTimeout(this.silenceTimer);
       this.silenceTimer = null;
     }
     
-    // Set a new silence timer to detect pauses/hesitations
     this.silenceTimer = window.setTimeout(() => {
       if (this.userIsResponding) {
         this.hesitationCount++;
-        console.log('Hesitation detected, count:', this.hesitationCount);
       }
     }, this.minSilenceForHesitation);
-    
+
     let interimTranscript = '';
     let finalTranscript = '';
     
@@ -127,9 +139,8 @@ class InterviewEngine extends EventEmitter {
         finalTranscript += event.results[i][0].transcript;
         
         if (this.userIsResponding) {
-          const responseTime = (Date.now() - this.userStartTime) / 1000; // Convert to seconds
-          
-          // Check for filler words
+          const responseTime = (Date.now() - this.userStartTime) / 1000;
+          const metrics = this.voiceAnalyzer.analyze();
           const detected = this.detectFillerWords(finalTranscript);
           
           const message: Message = {
@@ -138,14 +149,14 @@ class InterviewEngine extends EventEmitter {
             questionIndex: this.currentQuestionIndex,
             responseTime,
             fillerWords: detected,
-            hesitations: this.hesitationCount
+            hesitations: this.hesitationCount,
+            voiceMetrics: metrics
           };
           
           this.emit('message', message);
           this.userIsResponding = false;
-          this.hesitationCount = 0; // Reset hesitation count
+          this.hesitationCount = 0;
           
-          // Add a delay before asking the next question
           setTimeout(() => {
             if (this.isActive) {
               this.askNextQuestion();
@@ -160,7 +171,12 @@ class InterviewEngine extends EventEmitter {
       }
     }
   }
-  
+
+  private detectFillerWords(transcript: string): string[] {
+    const lowerText = transcript.toLowerCase();
+    return this.fillerWords.filter(word => lowerText.includes(word));
+  }
+
   private loadVoices(): void {
     const voices = this.speechSynthesis.getVoices();
     if (voices.length > 0) {
@@ -168,12 +184,7 @@ class InterviewEngine extends EventEmitter {
       this.voicesLoaded = true;
     }
   }
-  
-  private detectFillerWords(transcript: string): string[] {
-    const lowerText = transcript.toLowerCase();
-    return this.fillerWords.filter(word => lowerText.includes(word));
-  }
-  
+
   public async start(questions: string[], config: InterviewConfig): Promise<void> {
     if (questions.length === 0) {
       throw new Error('No questions provided for the interview');
@@ -190,7 +201,6 @@ class InterviewEngine extends EventEmitter {
     this.hesitationCount = 0;
     
     try {
-      // Force load voices if not already loaded
       if (!this.voicesLoaded) {
         this.speechSynthesis.getVoices();
       }
@@ -201,7 +211,6 @@ class InterviewEngine extends EventEmitter {
       
       await this.speakIntroduction();
       
-      // Ensure we start asking questions
       this.askNextQuestion();
     } catch (error) {
       console.error('Error starting interview:', error);
@@ -216,6 +225,7 @@ class InterviewEngine extends EventEmitter {
     
     this.isActive = false;
     this.speechSynthesis.cancel();
+    this.stopVoiceAnalysis();
     
     if (this.recognition) {
       try {
@@ -239,7 +249,7 @@ class InterviewEngine extends EventEmitter {
     const intro = `Hello ${userName}, I'm your AI interviewer today. We'll be conducting a ${jobRole || 'technical'} interview. I'll ask you a series of questions, and I'd like you to respond naturally as you would in a real interview. Let's begin in a moment.`;
     
     await this.speak(intro);
-    await this.pause(1000); // 1 second pause
+    await this.pause(1000);
   }
   
   private async speakConclusion(): Promise<void> {
@@ -252,7 +262,6 @@ class InterviewEngine extends EventEmitter {
     if (!this.isActive) return;
     
     this.currentQuestionIndex++;
-    console.log('Asking question:', this.currentQuestionIndex, 'of', this.questions.length);
     
     if (this.currentQuestionIndex < this.questions.length) {
       const question = this.questions[this.currentQuestionIndex];
@@ -270,7 +279,6 @@ class InterviewEngine extends EventEmitter {
       }
       
       const fullQuestion = `${transitionPhrase}${question}`;
-      console.log('Speaking question:', fullQuestion);
       
       this.speak(fullQuestion).then(() => {
         this.userStartTime = Date.now();
@@ -283,14 +291,12 @@ class InterviewEngine extends EventEmitter {
           questionIndex: this.currentQuestionIndex
         });
         
-        // Safety timeout in case user doesn't respond
         setTimeout(() => {
           if (this.userIsResponding && this.isActive) {
-            console.log('User did not respond in time, moving to next question');
             this.userIsResponding = false;
             this.askNextQuestion();
           }
-        }, 60000); // 1 minute timeout
+        }, 60000);
       });
     } else {
       this.stop();
@@ -307,15 +313,12 @@ class InterviewEngine extends EventEmitter {
       this.emit('speech-start');
       
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9; // Slightly slower rate for better clarity
+      utterance.rate = 0.9;
       utterance.pitch = 1;
-      utterance.volume = 1; // Maximum volume
+      utterance.volume = 1;
       
-      // Try to get a good quality voice
       const voices = this.speechSynthesis.getVoices();
-      console.log('Available voices:', voices.length);
       
-      // Choose a high-quality voice with preference order
       const preferredVoiceNames = [
         'Google US English', 
         'Microsoft David', 
@@ -327,7 +330,6 @@ class InterviewEngine extends EventEmitter {
       
       let selectedVoice = null;
       
-      // Try to find a preferred voice by exact name
       for (const voiceName of preferredVoiceNames) {
         const foundVoice = voices.find(voice => voice.name === voiceName);
         if (foundVoice) {
@@ -336,7 +338,6 @@ class InterviewEngine extends EventEmitter {
         }
       }
       
-      // If no preferred voice found by exact name, try partial match
       if (!selectedVoice) {
         for (const voiceName of preferredVoiceNames) {
           const foundVoice = voices.find(voice => 
@@ -349,43 +350,33 @@ class InterviewEngine extends EventEmitter {
         }
       }
       
-      // Fallback to any English voice if still no match
       if (!selectedVoice) {
         selectedVoice = voices.find(voice => 
           voice.lang.startsWith('en-') && !voice.name.includes('Google')
         );
       }
       
-      // Final fallback to any voice
       if (!selectedVoice && voices.length > 0) {
         selectedVoice = voices[0];
       }
       
       if (selectedVoice) {
-        console.log('Selected voice:', selectedVoice.name);
         utterance.voice = selectedVoice;
-      } else {
-        console.warn('No suitable voice found');
       }
       
       utterance.onend = () => {
         this.emit('speech-end');
-        console.log('Speech ended');
         resolve();
       };
       
       utterance.onerror = (event) => {
         this.emit('speech-end');
-        console.error('Speech synthesis error:', event);
         reject(event);
       };
       
-      // Make sure the speech synthesis is not canceled before speaking
       if (!this.speechSynthesis.speaking) {
         this.speechSynthesis.speak(utterance);
       } else {
-        console.warn('Speech synthesis is already speaking, waiting...');
-        // Add to queue
         setTimeout(() => {
           this.speechSynthesis.speak(utterance);
         }, 500);
@@ -404,14 +395,12 @@ class InterviewEngine extends EventEmitter {
   public resetRecognition(): void {
     if (this.recognition) {
       try {
-        console.log('Resetting speech recognition...');
         this.recognition.stop();
         setTimeout(() => {
           if (this.isActive) {
             this.recognition?.start();
-            console.log('Speech recognition reset complete');
           }
-        }, 500); // Slightly longer delay for reset
+        }, 500);
       } catch (e) {
         console.error('Error resetting speech recognition:', e);
       }

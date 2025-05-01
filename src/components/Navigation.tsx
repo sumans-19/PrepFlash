@@ -19,8 +19,8 @@ export function Navigation() {
           <Link to="/practice">
             <Button variant="ghost" className="text-lg hover:from-indigo-500 hover:to-purple-500 bg-gradient-to-r hover:text-white transition-transform hover:scale-110 duration-200 font-playfair px-4 py-2">Practice</Button>
           </Link>
-          <Link to="/roadmap">
-            <Button variant="ghost" className="text-lg hover:from-indigo-500 hover:to-purple-500 bg-gradient-to-r hover:text-white transition-transform hover:scale-110 duration-200 font-playfair px-4 py-2">Roadmap</Button>
+          <Link to="/dashboard">
+            <Button variant="ghost" className="text-lg hover:from-indigo-500 hover:to-purple-500 bg-gradient-to-r hover:text-white transition-transform hover:scale-110 duration-200 font-playfair px-4 py-2">Dashboard</Button>
           </Link>
           <ThemeToggle />
           <div className="flex items-center gap-3">

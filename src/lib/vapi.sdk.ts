@@ -1,216 +1,295 @@
 
-// Simple wrapper for VAPI API (Voice AI)
-// This is a stub implementation - you would need to replace this with your actual VAPI SDK
-
 import { EventEmitter } from 'events';
 
 class VapiSDK extends EventEmitter {
-  private isActive = false;
-  private isSpeaking = false;
+  private apiKey: string | null = null;
+  private baseUrl = 'https://api.vapi.ai';
   private currentQuestionIndex = 0;
-  private questions: string[] = [];
-  private userAnswers: string[] = [];
-  private speakTimeout: NodeJS.Timeout | null = null;
-  private transcript: { role: string; content: string }[] = [];
-  
+  private callInProgress = false;
+  private recognition: SpeechRecognition | null = null;
+
   constructor() {
     super();
-    this.handleUserSpeech = this.handleUserSpeech.bind(this);
+    // If you have a VAPI_API_KEY in your environment, use it
+    this.apiKey = import.meta.env.VITE_VAPI_API_KEY || null;
   }
 
-  async start(interviewerId: string, params: { variableValues: any }) {
-    try {
-      console.log('Starting VAPI interview with params:', params);
-      this.isActive = true;
-      this.currentQuestionIndex = 0;
-      this.questions = params.variableValues.questions.split('\n').map((q: string) => q.replace('- ', ''));
-      this.userAnswers = [];
-      this.transcript = [];
+  setApiKey(apiKey: string) {
+    this.apiKey = apiKey;
+  }
+
+  getCurrentQuestionIndex() {
+    return this.currentQuestionIndex;
+  }
+
+  async start(assistantId: string, options: any = {}) {
+    if (!this.apiKey) {
+      throw new Error('VAPI API key not set. Please set it using setApiKey method.');
+    }
+
+    if (this.callInProgress) {
+      throw new Error('Call already in progress. Please stop the current call first.');
+    }
+
+    // Reset the question index
+    this.currentQuestionIndex = 0;
+    this.callInProgress = true;
+
+    // Simulate call initialization and connection
+    setTimeout(() => {
+      this.emit('call-start');
       
-      // Simulate call connection
+      // Simulate the assistant introduction message
       setTimeout(() => {
-        this.emit('call-start');
-        this.askNextQuestion();
+        const username = options.variableValues?.username || 'User';
+        const introMessage = {
+          type: 'transcript',
+          transcriptType: 'final',
+          role: 'assistant',
+          transcript: `Hello ${username}! I'll be your interviewer today. I'll ask you a series of questions related to your job role. Please answer each question as thoroughly as you can.`
+        };
+        this.emit('message', introMessage);
+
+        // Parse and ask questions one by one
+        this.askNextQuestion(options.variableValues?.questions);
       }, 1500);
+    }, 1000);
+
+    return true;
+  }
+
+  private askNextQuestion(questionsText: string) {
+    if (!this.callInProgress) return;
+    
+    // Parse the questions (assuming they're in the format "- Question 1\n- Question 2")
+    const questions = questionsText.split('\n')
+      .map(line => line.replace(/^- /, '').trim())
+      .filter(q => q.length > 0);
+    
+    if (this.currentQuestionIndex < questions.length) {
+      // Simulate speech start
+      this.emit('speech-start');
       
-      return true;
-    } catch (error) {
-      console.error('Error starting VAPI call:', error);
-      this.emit('error', error);
-      return false;
+      // Simulate the assistant asking the question
+      setTimeout(() => {
+        const question = {
+          type: 'transcript',
+          transcriptType: 'final',
+          role: 'assistant',
+          transcript: questions[this.currentQuestionIndex]
+        };
+        this.emit('message', question);
+        this.emit('speech-end');
+        
+        // Simulate the user answering after a delay
+        setTimeout(() => {
+          // This is where we would normally wait for the user to speak
+          // For simulation, we'll handle user response in a separate method
+          this.simulateUserResponding();
+        }, 500);
+
+        this.currentQuestionIndex++;
+      }, 1000);
+    } else {
+      // All questions have been asked, end the call
+      setTimeout(() => {
+        const closingMessage = {
+          type: 'transcript',
+          transcriptType: 'final',
+          role: 'assistant',
+          transcript: "That's all the questions I have for you today. Thank you for your time and responses. The interview is now complete."
+        };
+        this.emit('message', closingMessage);
+        
+        setTimeout(() => {
+          this.stop();
+        }, 2000);
+      }, 1000);
     }
   }
 
-  stop() {
-    console.log('Stopping VAPI call');
-    this.isActive = false;
-    if (this.speakTimeout) {
-      clearTimeout(this.speakTimeout);
-    }
-    this.emit('call-end');
-  }
-
-  private askNextQuestion() {
-    // ... keep existing code (for asking the next question)
-    if (!this.isActive || this.currentQuestionIndex >= this.questions.length) {
-      this.stop();
-      return;
-    }
-    
-    const question = this.questions[this.currentQuestionIndex];
-    
-    // Simulate AI speaking
-    this.isSpeaking = true;
-    this.emit('speech-start');
-    
-    // Add question to transcript
-    const message = { role: 'assistant', content: question, transcript: question, transcriptType: 'final', type: 'transcript' };
-    this.transcript.push({ role: 'assistant', content: question });
-    this.emit('message', message);
-    
-    // Simulate speech end after a delay
-    this.speakTimeout = setTimeout(() => {
-      this.isSpeaking = false;
-      this.emit('speech-end');
-      
-      // Wait for user to answer (simulate with browser's speech recognition)
-      this.startListening();
-    }, 3000);
-  }
-  
-  private startListening() {
-    if (!this.isActive) return;
-    
-    console.log('Listening for user speech...');
-    
-    // Check if browser supports speech recognition
+  private simulateUserResponding() {
+    // In a real implementation, this would be triggered by user's voice
+    // Here we'll simulate the user speaking by listening for browser speech recognition
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      // Fixed TypeScript errors by using proper type casting
-      const SpeechRecognitionAPI = (window as any).SpeechRecognition || 
-                                  (window as any).webkitSpeechRecognition;
-      const recognition = new SpeechRecognitionAPI();
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      this.recognition = new SpeechRecognition();
       
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.lang = 'en-US';
+      this.recognition.continuous = false;
+      this.recognition.interimResults = true;
       
       let finalTranscript = '';
+      let isUserSpeaking = false;
       
-      recognition.onstart = () => {
-        console.log('Speech recognition started');
-        this.emit('message', { 
-          role: 'user', 
-          content: '...', 
-          transcript: '...', 
-          transcriptType: 'interim', 
-          type: 'transcript' 
-        });
+      this.recognition.onstart = () => {
+        finalTranscript = '';
+        isUserSpeaking = true;
+        this.emit('speech-start');
       };
       
-      recognition.onresult = (event: any) => {
-        let interimTranscript = '';
-        
+      this.recognition.onresult = (event) => {
+        let interim = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
             finalTranscript += event.results[i][0].transcript;
           } else {
-            interimTranscript += event.results[i][0].transcript;
+            interim += event.results[i][0].transcript;
           }
         }
         
-        // Emit interim results
-        if (interimTranscript) {
-          this.emit('message', { 
-            role: 'user', 
-            content: interimTranscript, 
-            transcript: interimTranscript, 
-            transcriptType: 'interim', 
-            type: 'transcript' 
-          });
+        // Emit interim transcript updates (could be used to show typing animation)
+        if (interim.length > 0) {
+          this.emit('interim-transcript', interim);
         }
       };
       
-      recognition.onerror = (event: any) => {
-        console.error('Speech recognition error', event.error);
-        this.handleUserSpeech('I apologize, but I couldn\'t hear your response clearly.');
-      };
-      
-      recognition.onend = () => {
-        // If we didn't get a final result, use what we have
-        if (!finalTranscript) {
-          finalTranscript = 'I apologize, but I couldn\'t hear your response clearly.';
+      this.recognition.onend = () => {
+        isUserSpeaking = false;
+        this.emit('speech-end');
+        
+        if (finalTranscript) {
+          const userMessage = {
+            type: 'transcript',
+            transcriptType: 'final',
+            role: 'user',
+            transcript: finalTranscript
+          };
+          this.emit('message', userMessage);
         }
         
-        this.handleUserSpeech(finalTranscript);
+        // Move to next question after a short pause
+        setTimeout(() => {
+          this.askNextQuestion(''); // No need to pass questions again
+        }, 1500);
       };
       
       // Start recognition
       try {
-        recognition.start();
-        
-        // Safety timeout - stop listening after 30 seconds
-        setTimeout(() => {
-          if (recognition) {
-            recognition.stop();
-          }
-        }, 30000);
-      } catch (e) {
-        console.error('Speech recognition error on start:', e);
-        this.simulateUserSpeech();
+        this.recognition.start();
+      } catch (error) {
+        console.error("Speech recognition error:", error);
+        this.emit('error', { message: 'Speech recognition failed to start' });
       }
     } else {
-      console.log('Speech recognition not supported, simulating user speech');
-      this.simulateUserSpeech();
+      // Fallback for browsers without speech recognition
+      console.warn("Speech recognition not supported in this browser");
+      this.emit('error', { 
+        message: 'Speech recognition is not supported in your browser. Try using Chrome.' 
+      });
     }
   }
-  
-  private simulateUserSpeech() {
-    // Fallback for browsers without speech recognition
-    setTimeout(() => {
-      const simulatedAnswers = [
-        "I have three years of experience with React and TypeScript. In my previous role, I built a dashboard application that improved team productivity by 25%.",
-        "I approach problem-solving methodically. First, I identify the core issue, then brainstorm solutions, evaluate trade-offs, and implement the best approach.",
-        "My greatest strength is my ability to learn quickly and adapt to new technologies. I'm always looking to improve my skills.",
-        "In difficult team situations, I focus on clear communication and finding common ground. I believe most conflicts come from misunderstandings.",
-        "I'm interested in this role because I want to work on challenging problems in a collaborative environment."
-      ];
-      
-      const answer = simulatedAnswers[this.currentQuestionIndex % simulatedAnswers.length];
-      this.handleUserSpeech(answer);
-    }, 5000);
-  }
-  
-  private handleUserSpeech(speech: string) {
-    if (!this.isActive) return;
+
+  stop() {
+    if (!this.callInProgress) {
+      return false;
+    }
     
-    // Add user answer to transcript
-    const message = { role: 'user', content: speech, transcript: speech, transcriptType: 'final', type: 'transcript' };
-    this.transcript.push({ role: 'user', content: speech });
-    this.userAnswers.push(speech);
-    this.emit('message', message);
+    this.callInProgress = false;
     
-    // Proceed to next question after a short delay
-    setTimeout(() => {
-      this.currentQuestionIndex++;
-      this.askNextQuestion();
-    }, 2000);
+    // Stop the speech recognition if it's active
+    if (this.recognition) {
+      try {
+        this.recognition.stop();
+      } catch (e) {
+        console.error("Error stopping speech recognition:", e);
+      }
+      this.recognition = null;
+    }
+    
+    this.emit('call-end');
+    return true;
   }
-  
-  getTranscript() {
-    return this.transcript;
-  }
-  
-  getCurrentQuestion() {
-    return this.questions[this.currentQuestionIndex] || null;
-  }
-  
-  getCurrentQuestionIndex() {
-    return this.currentQuestionIndex;
-  }
-  
-  getUserAnswers() {
-    return this.userAnswers;
+
+  // Mock implementation for the real Vapi SDK
+  callStatus() {
+    return this.callInProgress ? 'active' : 'inactive';
   }
 }
 
 export const vapi = new VapiSDK();
+// Speech recognition class
+export class SpeechRecognizer extends EventEmitter {
+  recognition: SpeechRecognition | null = null;
+  isListening: boolean = false;
+  transcript: string = '';
+  
+  constructor() {
+    super();
+    
+    // Check for browser support
+    if (typeof window !== 'undefined') {
+      const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+      
+      if (SpeechRecognitionAPI) {
+        this.recognition = new SpeechRecognitionAPI();
+        this.recognition.continuous = true;
+        this.recognition.interimResults = true;
+        this.recognition.lang = 'en-US';
+        
+        this.recognition.onresult = (event) => {
+          let interimTranscript = '';
+          let finalTranscript = '';
+          
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript;
+            } else {
+              interimTranscript += transcript;
+            }
+          }
+          
+          this.transcript = finalTranscript || interimTranscript;
+          this.emit('result', this.transcript);
+        };
+        
+        this.recognition.onend = () => {
+          this.isListening = false;
+          this.emit('end');
+        };
+        
+        this.recognition.onerror = (event) => {
+          this.emit('error', event);
+        };
+      }
+    }
+  }
+  
+  start() {
+    if (this.recognition && !this.isListening) {
+      try {
+        this.recognition.start();
+        this.isListening = true;
+        this.emit('start');
+      } catch (error) {
+        this.emit('error', error);
+      }
+    }
+    return this;
+  }
+  
+  stop() {
+    if (this.recognition && this.isListening) {
+      try {
+        this.recognition.stop();
+        this.isListening = false;
+      } catch (error) {
+        this.emit('error', error);
+      }
+    }
+    return this;
+  }
+  
+  clear() {
+    this.transcript = '';
+    return this;
+  }
+  
+  getText() {
+    return this.transcript;
+  }
+}
+
+export default SpeechRecognizer;
+
+
