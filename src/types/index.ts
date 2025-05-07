@@ -99,3 +99,77 @@ export interface FaceExpressions {
   // Define recording states
   export type RecordingState = "idle" | "preparing" | "recording" | "paused" | "reviewing" | "processing"
   
+export interface Article {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  imageUrl: string;
+  publishedAt: string;
+  source: string;
+  url: string;
+}
+
+export interface Job {
+  id: string;
+  company: string;
+  logo: string;
+  title: string;
+  location: string;
+  salary: string;
+  type: string;
+  description: string;
+  skills: string[];
+  postedAt: string;
+  deadline: string;
+  applicationUrl: string;
+}
+
+export interface Internship {
+  id: string;
+  title: string;
+  company: string;
+  logo?: string;
+  location: string;
+  stipend: string;
+  duration: string;
+  postedAt: string;
+  applicationUrl: string;
+}
+
+export interface JobRole {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+}
+
+export interface FlashCard {
+  id: string;
+  topic: string;
+  content: string;
+  codeExample?: string;
+}
+
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
+}
+
+export interface QuizResult {
+  totalQuestions: number;
+  correctAnswers: number;
+  timeTaken: number;
+  weakAreas: string[];
+  suggestions: string[];
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}

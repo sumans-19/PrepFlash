@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlashCard as FlashCardType } from '../../types';
+import { FlashCard as FlashCardType } from '../../types/index';
 import { Code } from 'lucide-react';
 
 interface FlashCardProps {

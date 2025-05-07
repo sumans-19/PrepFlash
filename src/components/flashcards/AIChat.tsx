@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, AlertCircle } from 'lucide-react';
-import { ChatMessage } from '../../types';
-import GeminiService from '../../services/GeminiService';
+import { ChatMessage } from '../../types/index';
+import GeminiService from '../../services/GeminiService3';
 
 interface AIChatProps {
   jobRoleId: string;

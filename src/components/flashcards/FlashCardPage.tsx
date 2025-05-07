@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MessageSquare, X } from 'lucide-react';
-import { FlashCard as FlashCardType } from '../../types';
+import { FlashCard as FlashCardType } from '../../types/index';
 import FlashCard from './FlashCard';
 import AIChat from './AIChat';
-import GeminiService from '../../services/GeminiService';
-import { jobRoles } from '../../data/jobRoles';
+import GeminiService from '../../services/GeminiService3';
+import { jobRoles } from '@/data/jobRoles';
 import { ThemeToggle } from '../ui/theme-toggle';
 
 const FlashCardPage: React.FC = () => {

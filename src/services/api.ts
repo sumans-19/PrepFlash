@@ -1,3 +1,117 @@
+import axios from "axios";
+import { Article, Internship, Job } from "../types/index"
+import { stripHtml } from "@/lib/utils";
+
+const API_KEY = "f159e0fa42a04a0096fb6474db3b10ab";
+// Replace with your actual API key
+
+export const fetchArticles = async (): Promise<Article[]> => {
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      const res = await fetch(
+        `https://newsapi.org/v2/everything?q=computer+science+OR+programming+OR+coding+OR+cse+students+OR+software+development+OR+AI+OR+machine+learning+OR+data+structures&language=en&sortBy=publishedAt&pageSize=10&apiKey=${API_KEY}`
+
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch technology news");
+      }
+
+      const json = await res.json();
+
+      const articles: Article[] = json.articles.map((article: any) => ({
+        id: article.publishedAt + "-" + article.title,
+        title: article.title,
+        description: article.description,
+        category: "Technology",
+        imageUrl: article.urlToImage || "https://via.placeholder.com/100",
+        publishedAt: article.publishedAt,
+        source: article.source.name,
+        url: article.url,
+      }));
+
+      // Simulate delay like in mock function
+      setTimeout(() => {
+        resolve(articles);
+      }, 500);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+
+
+
+
+
+
+
+
+export const fetchJobs = async (): Promise<Job[]> => {
+  try {
+    const res = await fetch(
+      'https://www.themuse.com/api/public/jobs?category=Software%20Engineering&location=India&page=1'
+    );
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch job listings");
+    }
+
+    const data = await res.json();
+
+    const jobs: Job[] = data.results
+      .filter((job: any) =>
+        job.locations.some((loc: any) =>
+          loc.name.toLowerCase().includes("india") || loc.name.toLowerCase().includes("remote")
+        )
+      )
+      .map((job: any) => ({
+        id: job.id.toString(),
+        company: job.company?.name || "Unknown Company",
+        logo: job.refs?.landing_page,
+        title: job.name,
+        location: job.locations.map((loc: any) => loc.name).join(", ") || "Remote",
+        salary: job.salary || "Not specified",
+        type: job.type || "Full-time",
+        description: stripHtml(job.contents),
+        skills: job.categories?.map((cat: any) => cat.name) || [],
+        postedAt: job.publication_date,
+        deadline: "",
+        applicationUrl: job.refs?.landing_page || "#",
+      }));
+
+    return new Promise((resolve) => setTimeout(() => resolve(jobs), 500));
+  } catch (error) {
+    console.error("Error fetching jobs:", error);
+    return [];
+  }
+};
+
+
+export const fetchInternships = async (): Promise<Internship[]> => {
+  try {
+    // Send a GET request to the API
+    const response = await axios.get('http://localhost:3000/api/internships');
+    
+    // Assuming the API response is in the same format as expected
+    const internships: Internship[] = response.data.map((internship: any) => ({
+      title: internship.title || 'No title',
+      company: internship.company || 'No company',
+      location: internship.location || 'No location',
+      stipend: internship.stipend || 'No stipend',
+      duration: internship.duration || 'No duration',
+      postedAt: internship.postedAt,
+      applicationUrl: internship.applicationUrl || 'https://internshala.comundefined',
+    }));
+
+    return internships;
+  } catch (error) {
+    console.error('Error fetching internships:', error);
+    return [];  // Return empty array in case of an error
+  }
+};
 
 // This is the actual API service implementation
 // Using Google Cloud Speech-to-Text and Gemini API
@@ -308,4 +422,3 @@ export interface InterviewSetup {
       speechSynthesis.speak(utterance);
     });
   };
-  

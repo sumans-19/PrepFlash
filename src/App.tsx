@@ -30,6 +30,14 @@ import WebDevelopmentCourse from "./pages/WebDevelopmentCourse";
 import { ThemeProvider } from "next-themes";
 import AiMlCourse from "./pages/AiMlCourse";
 import CommunityPage from "./pages/CommunityPage";
+import Roadmappage from "./pages/Roadmappage";
+import ResumeBuilderPage from "./pages/ResumeBuilderPage";
+import TechHub from "./pages/TechHub";
+import JobRoleSelection from "./components/JobRoleSelection";
+import FlashCardPage from "./components/flashcards/FlashCardPage";
+import PrepOptions from "./components/PrepOptions";
+import QuizPage from "./quiz/QuizPage";
+import ResultsPage from "./quiz/ResultsPage";
 // import ProfilePage from "./pages/ProfilePage";
 
 import React from "react";
@@ -42,11 +50,11 @@ const App = () => {
 
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
 
-        
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
@@ -70,19 +78,30 @@ const App = () => {
               <Route path="/aptitude-questions" element={<AptitudeQuestionBank />} />
               <Route path="/aptitudehome" element={<AptitudeHome />} />
 
+
               <Route path="/learningtoolkit" element={<LearningToolKit />} />
               <Route path="/learningpath" element={<LearningPath />} />
-              <Route path="/web-development" element={<WebDevelopmentCourse/>} />
-              <Route path="/ai/ml" element={<AiMlCourse/>} />
+              <Route path="/web-development" element={<WebDevelopmentCourse />} />
+              <Route path="/ai/ml" element={<AiMlCourse />} />
 
-              
+
+              <Route path="/roadmap" element={<Roadmappage />} />
+              <Route path="/resume-builder" element={<ResumeBuilderPage />} />
+              <Route path="/tech-hub" element={<TechHub />} />
+              <Route path="/prep-kit" element={<JobRoleSelection />} />
+              <Route path="/prep-options/:roleId" element={<PrepOptions />} />
+              <Route path="/flash-cards/:roleId" element={<FlashCardPage />} />
+              <Route path="/quiz/:roleId" element={<QuizPage />} />
+              <Route path="/quiz-results/:roleId" element={<ResultsPage />} />
+
+
 
 
 
               <Route path="*" element={<NotFound />} />
             </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
+          </BrowserRouter>
+        </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

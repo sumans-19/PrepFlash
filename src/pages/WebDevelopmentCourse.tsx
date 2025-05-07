@@ -18,7 +18,7 @@ import WeeklyGoals from '@/components/webdev/WeeklyGoals';
 import SetWeeklyGoals from '@/components/webdev/SetWeeklyGoals';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
-// Theme toggle component with enhanced styling
+// Theme toggle component with professional styling
 const ThemeToggle = () => {
   const [theme, setTheme] = useState('light');
 
@@ -48,12 +48,12 @@ const ThemeToggle = () => {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="rounded-full bg-white/10 dark:bg-gray-800/30 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
+      className="rounded-full bg-indigo-100/80 dark:bg-indigo-900/50 backdrop-blur-md border border-indigo-200 dark:border-indigo-700 hover:bg-indigo-200 dark:hover:bg-indigo-800 shadow-lg transition-all duration-300"
       aria-label="Toggle theme"
     >
       {theme === 'light' ?
-        <Moon size={18} className="text-gray-700 dark:text-gray-300" /> :
-        <Sun size={18} className="text-purple-400" />
+        <Moon size={20} className="text-indigo-600 dark:text-indigo-300" /> :
+        <Sun size={20} className="text-yellow-500" />
       }
     </Button>
   );
@@ -167,83 +167,178 @@ const WebDevelopmentCourse = () => {
   }, []);
 
   return (
-    <div className="min-h-screen pb-16 relative bg-gray-950 dark:bg-gray-950 transition-all duration-500">
-      {/* Top Bar Section */}
-      <div className="mx-4 md:mx-8 pt-6 flex justify-between items-center z-10 relative">
-        <div className="flex items-center space-x-2">
-          <Code className="h-5 w-5 text-purple-500 dark:text-purple-400" strokeWidth={2.5} />
-          <span className="font-semibold text-white dark:text-white">WebDevPath</span>
-        </div>
+    <div className="min-h-screen pb-16 relative bg-gradient-to-br from-indigo-50/50 via-purple-50/30 to-blue-50/50 dark:from-gray-900 dark:via-indigo-950/30 dark:to-purple-950/50 transition-all duration-500">
+      {/* Top Bar Section - More Professional */}
+      <div className="mx-4 md:mx-8 mt-4 flex justify-between items-start z-10 relative">
+        <Badge className="mb-4 bg-white/20 hover:bg-white/30 text-gray-800 dark:text-gray-200 transition-all duration-300"></Badge>
         <div className="flex items-center gap-3">
           <ThemeToggle />
-
-          {/* Weekly Goals dialog */}
+          
+          {/* Weekly Goals dialog with professional styling */}
           <WeeklyGoalsDialog title="Weekly Goals" component={() => <WeeklyGoals courseType="web-development" />}>
-            <Button
-              size="sm"
+            <Button 
+              size="sm" 
               variant="outline"
-              className="bg-purple-600 text-white hover:bg-purple-700 shadow-sm transition-all duration-300"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md transition-all duration-300"
             >
-              View Goals
+              Weekly Goals
             </Button>
           </WeeklyGoalsDialog>
-
-          {/* Set Weekly Goals dialog */}
+          
+          {/* Set Weekly Goals dialog with professional styling */}
           <WeeklyGoalsDialog title="Set Weekly Goals" component={() => <SetWeeklyGoals />}>
-            <Button
+            <Button 
               size="sm"
-              className="bg-purple-700 text-white hover:bg-purple-800 shadow-sm transition-all duration-300"
+              className="bg-purple-600 hover:bg-purple-700 text-white shadow-md transition-all duration-300"
             >
-              Set Goals
+              Set Weekly Goals
             </Button>
           </WeeklyGoalsDialog>
         </div>
       </div>
-
-      {/* Subtle Background */}
+      
+      {/* Enhanced Cosmic Background - Keeping the space theme */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        {/* Gradient spots */}
-        <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-purple-900/20 dark:bg-purple-900/20 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/4"></div>
-        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-purple-900/20 dark:bg-purple-900/20 rounded-full blur-3xl transform -translate-x-1/4 translate-y-1/4"></div>
+        {/* Stars */}
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={`star-${i}`}
+            className="absolute rounded-full bg-white dark:bg-indigo-100 animate-twinkle"
+            style={{
+              top: `${Math.random() * 100}vh`,
+              left: `${Math.random() * 100}vw`,
+              width: `${Math.random() * 3 + 1}px`,
+              height: `${Math.random() * 3 + 1}px`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${Math.random() * 3 + 2}s`,
+              opacity: Math.random() * 0.7 + 0.3
+            }}
+          />
+        ))}
+        
+        {/* Nebulae */}
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={`nebula-${i}`}
+            className="absolute rounded-full blur-3xl opacity-20 dark:opacity-30 animate-float"
+            style={{
+              background: i % 2 === 0 ? 
+                'radial-gradient(circle, rgba(122,0,255,0.4) 0%, rgba(122,0,255,0) 70%)' : 
+                'radial-gradient(circle, rgba(0,122,255,0.4) 0%, rgba(0,122,255,0) 70%)',
+              top: `${Math.random() * 100}vh`,
+              left: `${Math.random() * 100}vw`,
+              width: `${Math.random() * 300 + 200}px`,
+              height: `${Math.random() * 300 + 200}px`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${Math.random() * 20 + 30}s`,
+            }}
+          />
+        ))}
       </div>
 
-      {/* Hero Section */}
-      <div className="relative bg-gray-900 dark:bg-gray-900 shadow-md rounded-xl overflow-hidden mx-4 md:mx-8 mt-8 border border-gray-800 dark:border-gray-800 transition-all duration-300 hover:shadow-lg">
-        <div className="max-w-6xl mx-auto px-6 md:px-8 py-12 md:py-16 relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-10">
-            <div className="space-y-6 md:w-3/5">
-              <Badge className="bg-purple-900/50 dark:bg-purple-900/50 text-purple-300 dark:text-purple-300 hover:bg-purple-800 dark:hover:bg-purple-800">
-                <Rocket className="mr-2 inline-block h-3 w-3" /> Web Development Path
-              </Badge>
-
-              <h1 className="text-3xl md:text-4xl font-bold text-white dark:text-white tracking-tight">
-                Master Modern Web Development <span className="text-purple-500 dark:text-purple-400">Step by Step</span>
-              </h1>
-
-              <p className="text-gray-300 dark:text-gray-300 leading-relaxed">
-                From fundamentals to advanced concepts, build your skills through structured learning paths and hands-on projects.
-              </p>
-
-              <div className="flex items-center gap-4 text-sm text-gray-400 dark:text-gray-400">
-                <span className="font-medium">Progress:</span>
-                <Progress value={progress} className="w-32 md:w-48 h-2 bg-gray-700" />
-                <span className="font-mono">{progress}%</span>
+      {/* Cosmic Hero Section - UNCHANGED as requested */}
+      <div className="relative bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 text-white py-20 shadow-xl rounded-xl overflow-hidden mx-4 md:mx-8 mt-8 border border-indigo-400/30 dark:border-indigo-700/30">
+        {/* Hero Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Particle effects */}
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={`particle-${i}`}
+              className="absolute rounded-full bg-white/10 blur-md"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                width: `${Math.random() * 120 + 50}px`,
+                height: `${Math.random() * 120 + 50}px`,
+                transform: `scale(${Math.random() * 0.5 + 0.5})`,
+              }}
+            />
+          ))}
+          
+          {/* Grid lines */}
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0wIDYwaDYwVjBoLTYweiIvPjxwYXRoIGQ9Ik0zMCAwdjYwIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjxwYXRoIGQ9Ik0wIDMwaDYwIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjwvZz48L3N2Zz4=')]" />
+        </div>
+        
+        <div className="max-w-6xl mx-auto px-6 md:px-12 relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+          <div className="space-y-6 md:w-3/5">
+            <Badge className="bg-white/10 backdrop-blur-md border border-white/20 text-indigo-100 hover:bg-white/20 px-4 py-2 text-sm font-medium transition-all duration-300 shadow-lg">
+              <Rocket className="mr-2 inline-block h-4 w-4" /> Web Development Odyssey
+            </Badge>
+            
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight">
+              Embark on Your<br/>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-purple-200">Web Dev Universe</span>
+            </h1>
+            
+            <p className="text-lg md:text-xl text-indigo-100 max-w-2xl leading-relaxed">
+              Unlock the secrets of the web. From foundational principles to crafting interactive experiences, prepare for liftoff into a new dimension of development mastery!
+            </p>
+            
+            <div className="mt-6">
+              <div className="flex items-center gap-4 text-sm text-indigo-200">
+                <span className="font-semibold">Progress:</span>
+                <Progress value={progress} className="w-64 h-2 bg-white/10" />
+                <span className="font-mono">{progress}% Explored</span>
               </div>
-
-              <Button className="mt-2 bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition-all duration-300 animate-fade-in">
-                Continue Learning
-              </Button>
             </div>
-
-            {/* Simple, clean illustration */}
-            <div className="hidden md:block md:w-2/5">
-              <div className="relative aspect-square max-w-xs mx-auto">
-                <div className="absolute inset-4 rounded-full border-4 border-dashed border-purple-800/40 dark:border-purple-800/40 opacity-60 animate-spin-slow" style={{ animationDuration: '30s' }}></div>
-                <div className="absolute inset-12 rounded-full border-4 border-dashed border-purple-700/40 dark:border-purple-700/40 opacity-70 animate-spin-slow" style={{ animationDuration: '20s', animationDirection: 'reverse' }}></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg flex items-center justify-center transform transition-transform duration-700 hover:scale-110 hover:rotate-3">
-                    <Code className="text-white h-12 w-12" />
-                  </div>
+            
+            <Button className="mt-4 bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 text-white px-6 py-2 rounded-full shadow-lg transition-all duration-300 flex items-center gap-2">
+              <Zap size={18} />
+              Begin Your Journey
+            </Button>
+          </div>
+          
+          {/* Enhanced 3D Hero Visual */}
+          <div className="hidden md:flex md:w-2/5 justify-center">
+            <div className="relative w-72 h-72">
+              {/* Orbiting circles */}
+              <div className="absolute inset-0 animate-spin-slow" style={{ animationDuration: '30s' }}>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full border-2 border-dashed border-indigo-400/40 rounded-full"></div>
+              </div>
+              
+              <div className="absolute inset-0 animate-spin-slow" style={{ animationDuration: '20s', animationDirection: 'reverse' }}>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-3/4 border-2 border-dashed border-pink-400/40 rounded-full"></div>
+              </div>
+              
+              {/* Central glowing orb */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-36 h-36 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full blur-md opacity-60"></div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-br from-indigo-300 to-purple-400 rounded-full flex items-center justify-center shadow-lg">
+                <Code className="text-white h-16 w-16" />
+              </div>
+              
+              {/* Orbiting elements */}
+              <div
+                className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-orbit"
+                style={{ '--orbit-speed': '15s', '--orbit-size': '36' } as React.CSSProperties}
+              >
+                <div className="w-10 h-10 rounded-full bg-blue-500/80 flex items-center justify-center shadow-lg">
+                  <FileCode className="text-white h-5 w-5" />
+                </div>
+              </div>
+              
+              <div
+                className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 animate-orbit"
+                style={{
+                  '--orbit-speed': '20s',
+                  '--orbit-size': '36',
+                  animationDelay: '5s',
+                } as React.CSSProperties}
+              >
+                <div className="w-10 h-10 rounded-full bg-purple-500/80 flex items-center justify-center shadow-lg">
+                  <Star className="text-white h-5 w-5" />
+                </div>
+              </div>
+              
+              <div
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 animate-orbit"
+                style={{
+                  '--orbit-speed': '25s',
+                  '--orbit-size': '36',
+                  animationDelay: '2.5s',
+                } as React.CSSProperties}
+              >
+                <div className="w-10 h-10 rounded-full bg-pink-500/80 flex items-center justify-center shadow-lg">
+                  <HelpCircle className="text-white h-5 w-5" />
                 </div>
               </div>
             </div>
@@ -251,488 +346,491 @@ const WebDevelopmentCourse = () => {
         </div>
       </div>
 
-      {/* Main Content with Tabs */}
-      <div className="max-w-6xl mx-auto px-4 mt-10 space-y-6">
+      {/* Main Content with Professional UI */}
+      <div className="max-w-6xl mx-auto px-4 mt-12 space-y-8">
         <Tabs defaultValue="theory" className="animate-fade-in">
-          <TabsList className="flex w-full md:w-auto overflow-x-auto p-1 rounded-lg bg-gray-900 dark:bg-gray-900 shadow-sm border border-gray-800 dark:border-gray-800">
-            <TabsTrigger
-              value="theory"
-              className="flex-1 md:flex-none px-4 py-2 text-sm rounded-md data-[state=active]:bg-purple-900/50 data-[state=active]:text-purple-300 dark:data-[state=active]:bg-purple-900/50 dark:data-[state=active]:text-purple-300 transition-all duration-200">
-              <BookOpen className="h-4 w-4 md:mr-2 md:inline-block" />
-              <span className="hidden md:inline">Theory</span>
+          <TabsList className="grid grid-cols-4 gap-2 md:gap-4 mb-8 p-1.5 rounded-xl bg-white/80 dark:bg-gray-900/70 backdrop-blur-md shadow-lg">
+            <TabsTrigger 
+              value="theory" 
+              className="text-lg py-2 px-1 rounded-lg transition-all duration-200 flex items-center justify-center gap-2">
+              <BookOpen className="h-5 w-5" /> 
+              <span className="hidden sm:inline">Theory</span>
             </TabsTrigger>
-            <TabsTrigger
-              value="resources"
-              className="flex-1 md:flex-none px-4 py-2 text-sm rounded-md data-[state=active]:bg-purple-900/50 data-[state=active]:text-purple-300 dark:data-[state=active]:bg-purple-900/50 dark:data-[state=active]:text-purple-300 transition-all duration-200">
-              <FileCode className="h-4 w-4 md:mr-2 md:inline-block" />
-              <span className="hidden md:inline">Resources</span>
+            <TabsTrigger 
+              value="resources" 
+              className="text-lg py-2 px-1 rounded-lg transition-all duration-200 flex items-center justify-center gap-2">
+              <FileCode className="h-5 w-5" /> 
+              <span className="hidden sm:inline">Resources</span>
             </TabsTrigger>
-            <TabsTrigger
-              value="quiz"
-              className="flex-1 md:flex-none px-4 py-2 text-sm rounded-md data-[state=active]:bg-purple-900/50 data-[state=active]:text-purple-300 dark:data-[state=active]:bg-purple-900/50 dark:data-[state=active]:text-purple-300 transition-all duration-200">
-              <HelpCircle className="h-4 w-4 md:mr-2 md:inline-block" />
-              <span className="hidden md:inline">Quiz</span>
+            <TabsTrigger 
+              value="quiz" 
+              className="text-lg py-2 px-1 rounded-lg transition-all duration-200 flex items-center justify-center gap-2">
+              <HelpCircle className="h-5 w-5" /> 
+              <span className="hidden sm:inline">Quiz</span>
             </TabsTrigger>
-            <TabsTrigger
-              value="practice"
-              className="flex-1 md:flex-none px-4 py-2 text-sm rounded-md data-[state=active]:bg-purple-900/50 data-[state=active]:text-purple-300 dark:data-[state=active]:bg-purple-900/50 dark:data-[state=active]:text-purple-300 transition-all duration-200">
-              <Code className="h-4 w-4 md:mr-2 md:inline-block" />
-              <span className="hidden md:inline">Practice</span>
+            <TabsTrigger 
+              value="practice" 
+              className="text-lg py-2 px-1 rounded-lg transition-all duration-200 flex items-center justify-center gap-2">
+              <Code className="h-5 w-5" /> 
+              <span className="hidden sm:inline">Practice</span>
             </TabsTrigger>
           </TabsList>
 
-          {/* Theory Section - Refined */}
-          <TabsContent value="theory" className="focus-visible:outline-none focus-visible:ring-0">
-            <Card className="border border-gray-800 dark:border-gray-800 shadow-md animate-fade-in bg-gray-900">
-              <CardHeader className="bg-gradient-to-r from-purple-900 to-purple-800 p-6">
-                <Badge className="w-fit bg-white/10 text-white mb-3">
-                  FUNDAMENTALS
-                </Badge>
-                <CardTitle className="text-xl md:text-2xl text-white flex items-center">
-                  <BookOpen className="mr-3 h-5 w-5" />
-                  Introduction to Web Development
-                </CardTitle>
-                <CardDescription className="text-purple-100">
-                  Core concepts and fundamental principles
-                </CardDescription>
+          {/* Theory Section - Professional Redesign */}
+          <TabsContent value="theory" className="space-y-8">
+            <Card className="border-0 shadow-lg bg-white/95 dark:bg-gray-900/90 backdrop-blur-md rounded-lg transition-all duration-300">
+              <CardHeader className="bg-indigo-600 p-6">
+                <div className="relative z-10">
+                  <Badge className="bg-white/10 text-xs mb-2 font-normal px-2 py-1">
+                    FUNDAMENTALS
+                  </Badge>
+                  <CardTitle className="text-2xl font-bold tracking-tight text-white flex items-center">
+                    <BookOpen className="mr-3 h-6 w-6" /> 
+                    Introduction to Web Development
+                  </CardTitle>
+                  <CardDescription className="text-indigo-100 mt-2">
+                    Understanding the foundation of web technologies
+                  </CardDescription>
+                </div>
               </CardHeader>
-
-              <CardContent className="p-6">
-                <div className="prose max-w-none text-gray-300 dark:text-gray-300">
+              
+              <CardContent className="p-6 animate-fade-in">
+                <div className="prose max-w-none text-gray-800 dark:text-gray-200">
                   <p className="text-lg leading-relaxed mb-6">
-                    Web development involves two main components: the <strong>front-end</strong> that users interact with, and the <strong>back-end</strong> that powers functionality behind the scenes.
+                    The web's creation involves a fascinating duality: the visible <strong>front-end</strong>, where user interactions spark, and the hidden <strong>back-end</strong>, the silent engine powering it all.
                   </p>
 
-                  <h3 className="text-lg font-semibold mt-6 mb-3 text-purple-400 dark:text-purple-400 flex items-center gap-2">
-                    <Star className="h-4 w-4" /> Front-End Technologies
+                  <h3 className="text-xl font-semibold mt-8 mb-4 text-indigo-700 dark:text-indigo-400 flex items-center gap-2 pb-2 border-b border-indigo-200 dark:border-indigo-800/50">
+                    <Star className="h-5 w-5" /> The Front-End Technologies
                   </h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
-                    <div className="bg-gray-800/50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-700/50 dark:border-gray-700/50 transition-all duration-300 hover:shadow-md">
-                      <h4 className="font-medium text-purple-400 dark:text-purple-400 mb-2">HTML</h4>
-                      <p className="text-sm">The structural foundation that defines the content of web pages.</p>
+                  
+                  <p className="mb-4">The trinity of front-end technologies shapes the user experience:</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+                    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                      <h4 className="font-semibold text-indigo-600 dark:text-indigo-400 mb-2">HTML</h4>
+                      <p className="text-sm">The structural foundation of web pages, defining content elements.</p>
                     </div>
-
-                    <div className="bg-gray-800/50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-700/50 dark:border-gray-700/50 transition-all duration-300 hover:shadow-md">
-                      <h4 className="font-medium text-purple-400 dark:text-purple-400 mb-2">CSS</h4>
+                    
+                    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                      <h4 className="font-semibold text-blue-600 dark:text-blue-400 mb-2">CSS</h4>
                       <p className="text-sm">The styling language that controls the presentation and layout.</p>
                     </div>
-
-                    <div className="bg-gray-800/50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-700/50 dark:border-gray-700/50 transition-all duration-300 hover:shadow-md">
-                      <h4 className="font-medium text-purple-400 dark:text-purple-400 mb-2">JavaScript</h4>
-                      <p className="text-sm">The programming language that adds interactivity and dynamic behavior.</p>
+                    
+                    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                      <h4 className="font-semibold text-purple-600 dark:text-purple-400 mb-2">JavaScript</h4>
+                      <p className="text-sm">The programming language that adds interactivity to websites.</p>
                     </div>
                   </div>
 
-                  <div className="bg-purple-900/20 dark:bg-purple-900/20 p-4 rounded-lg my-6 border border-purple-800/50 dark:border-purple-800/50">
-                    <h4 className="font-medium mb-2 text-purple-400 dark:text-purple-400 flex items-center gap-2">
-                      <Zap className="h-4 w-4" /> Modern Frameworks
+                  <div className="bg-gray-50 dark:bg-gray-800 p-5 rounded-lg mb-8 border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <h4 className="font-semibold mb-3 text-indigo-700 dark:text-indigo-300 flex items-center gap-2">
+                      <Zap className="h-4 w-4" /> Modern Frontend Frameworks
                     </h4>
-                    <p className="text-sm">
-                      Modern development often leverages frameworks like React, Vue, and Angular to create reusable component-based interfaces more efficiently.
+                    <p className="text-gray-700 dark:text-gray-300">
+                      Modern front-end development often leverages frameworks like React, Vue, and Angular – collections of reusable components simplifying the creation of complex interfaces.
                     </p>
                   </div>
 
-                  <h3 className="text-lg font-semibold mt-6 mb-3 text-purple-400 dark:text-purple-400 flex items-center gap-2">
-                    <Star className="h-4 w-4" /> Back-End Development
+                  <h3 className="text-xl font-semibold mt-10 mb-4 text-blue-700 dark:text-blue-400 flex items-center gap-2 pb-2 border-b border-blue-200 dark:border-blue-800/50">
+                    <Star className="h-5 w-5" /> The Back-End Systems
                   </h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 my-4">
-                    <div className="flex items-start gap-3 p-3 bg-gray-800/50 dark:bg-gray-800/50 rounded-lg border border-gray-700/50 dark:border-gray-700/50">
-                      <div className="bg-purple-900/50 dark:bg-purple-900/50 p-2 rounded-full">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-purple-400 dark:text-purple-400">
+                  
+                  <p className="mb-4">The back-end handles the server-side operations:</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 my-6">
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <div className="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-full">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-blue-600 dark:text-blue-400">
                           <path d="M20 16l-4-4 4-4" />
                           <path d="M4 8l4 4-4 4" />
                           <path d="M16 4l-8 16" />
                         </svg>
                       </div>
                       <div>
-                        <h4 className="font-medium text-sm">Server Processing</h4>
-                        <p className="text-xs text-gray-400 dark:text-gray-400">Logic and functionality handling.</p>
+                        <h4 className="font-medium">Server-side Processing</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">The calculations and logic behind the scenes.</p>
                       </div>
                     </div>
-
-                    <div className="flex items-start gap-3 p-3 bg-gray-800/50 dark:bg-gray-800/50 rounded-lg border border-gray-700/50 dark:border-gray-700/50">
-                      <div className="bg-purple-900/50 dark:bg-purple-900/50 p-2 rounded-full">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-purple-400 dark:text-purple-400">
+                    
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <div className="bg-green-100 dark:bg-green-900/50 p-2 rounded-full">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-green-600 dark:text-green-400">
                           <path d="M3 3h18v18H3z" />
                           <path d="M7 7h10v10H7z" />
                           <path d="M15 15h2v2h-2z" />
                         </svg>
                       </div>
                       <div>
-                        <h4 className="font-medium text-sm">Database Systems</h4>
-                        <p className="text-xs text-gray-400 dark:text-gray-400">Data storage and retrieval.</p>
+                        <h4 className="font-medium">Database Management</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Storing and retrieving application data.</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <div className="bg-purple-100 dark:bg-purple-900/50 p-2 rounded-full">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-purple-600 dark:text-purple-400">
+                          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-medium">API Development</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Creating interfaces for data exchange between systems.</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <div className="bg-orange-100 dark:bg-orange-900/50 p-2 rounded-full">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-orange-600 dark:text-orange-400">
+                          <path d="M12 12m-10 0a10 10 0 1 0 20 0a10 10 0 1 0 -20 0" />
+                          <path d="M12 16v-8" />
+                          <path d="M12 8h.01" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-medium">User Authentication</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Verifying user identities and managing access control.</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-purple-900/20 dark:bg-purple-900/20 p-4 rounded-lg my-6 border border-purple-800/50 dark:border-purple-800/50">
-                    <h4 className="font-medium mb-2 text-purple-400 dark:text-purple-400 flex items-center gap-2">
-                      <Zap className="h-4 w-4" /> Backend Technologies
-                    </h4>
-                    <p className="text-sm">
-                      Common technologies include Node.js, Python (Django, Flask), Ruby (Rails), PHP, and Java. Database systems like MongoDB, MySQL, and PostgreSQL manage data storage.
-                    </p>
-                  </div>
-                </div>
+                  <div className="bg-gray-50 dark:bg-gray-800 p-5 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+  <h4 className="font-semibold mb-3 text-blue-700 dark:text-blue-300 flex items-center gap-2">
+    <Zap className="h-4 w-4" /> Popular Back-End Technologies
+  </h4>
+  <p className="text-gray-700 dark:text-gray-300">
+    Back-end development commonly uses languages and frameworks like Node.js, Python (Django, Flask), Ruby on Rails, PHP, and Java Spring Boot to build robust server-side applications.
+  </p>
+</div>
 
-                <div className="flex justify-center mt-6">
-                  <Button
-                    onClick={() => {
-                      toast({
-                        title: "Module Completed",
-                        description: "You've unlocked the next section",
-                      });
-                      setProgress((prev) => Math.min(prev + 10, 100));
-                    }}
-                    className="bg-purple-600 hover:bg-purple-700 text-white transition-all duration-300"
-                  >
-                    Mark as Completed
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+<h3 className="text-xl font-semibold mt-10 mb-4 text-purple-700 dark:text-purple-400 flex items-center gap-2 pb-2 border-b border-purple-200 dark:border-purple-800/50">
+  <Star className="h-5 w-5" /> The Full Stack Journey
+</h3>
 
-          {/* Resources Section - Refined */}
-          <TabsContent value="resources" className="focus-visible:outline-none focus-visible:ring-0">
-            <Card className="border border-gray-800 dark:border-gray-800 shadow-md animate-fade-in bg-gray-900">
-              <CardHeader className="bg-gradient-to-r from-purple-900 to-purple-800 p-6">
-                <Badge className="w-fit bg-white/20 text-white mb-3">
-                  LEARNING MATERIALS
-                </Badge>
-                <CardTitle className="text-xl md:text-2xl text-white flex items-center">
-                  <FileCode className="mr-3 h-5 w-5" />
-                  Resources Collection
-                </CardTitle>
-                <CardDescription className="text-purple-100">
-                  Essential tools and references for developers
-                </CardDescription>
-              </CardHeader>
+<p className="mb-6">
+  The path to becoming a proficient web developer involves mastering both front-end and back-end technologies. This "full-stack" approach empowers you to create complete web applications from start to finish.
+</p>
 
-              <CardContent className="p-6">
-                <ResourceList resources={resources} />
-              </CardContent>
-            </Card>
-          </TabsContent>
+<div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-px shadow-xl shadow-indigo-500/20 mb-8">
+  <div className="bg-white dark:bg-gray-900 rounded-[calc(0.75rem-1px)] p-6">
+    <h4 className="text-lg font-semibold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">Development Workflow</h4>
+    <ol className="space-y-3 text-gray-700 dark:text-gray-300">
+      <li className="flex items-start gap-3">
+        <div className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5">1</div>
+        <div>
+          <span className="font-medium">Planning & Design</span>: Define requirements and create wireframes/mockups
+        </div>
+      </li>
+      <li className="flex items-start gap-3">
+        <div className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5">2</div>
+        <div>
+          <span className="font-medium">Front-End Development</span>: Build the user interface and client-side functionality
+        </div>
+      </li>
+      <li className="flex items-start gap-3">
+        <div className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5">3</div>
+        <div>
+          <span className="font-medium">Back-End Development</span>: Create server, database, and APIs
+        </div>
+      </li>
+      <li className="flex items-start gap-3">
+        <div className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5">4</div>
+        <div>
+          <span className="font-medium">Testing & Debugging</span>: Ensure functionality and fix issues
+        </div>
+      </li>
+      <li className="flex items-start gap-3">
+        <div className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5">5</div>
+        <div>
+          <span className="font-medium">Deployment & Maintenance</span>: Launch and continually improve
+        </div>
+      </li>
+    </ol>
+  </div>
+</div>
 
-          {/* Quiz Section - Refined */}
-          <TabsContent value="quiz" className="focus-visible:outline-none focus-visible:ring-0">
-            <Card className="border border-gray-800 dark:border-gray-800 shadow-md animate-fade-in bg-gray-900">
-              <CardHeader className="bg-gradient-to-r from-purple-900 to-purple-800 p-6">
-                <Badge className="w-fit bg-white/20 text-white mb-3">
-                  KNOWLEDGE CHECK
-                </Badge>
-                <CardTitle className="text-xl md:text-2xl text-white flex items-center">
-                  <HelpCircle className="mr-3 h-5 w-5" />
-                  Quiz Challenge
-                </CardTitle>
-                <CardDescription className="text-purple-100">
-                  Test your understanding of web development concepts
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent className="p-6">
-                <div className="flex justify-center">
-                  <div className="w-full max-w-3xl">
-                    <QuizSection
-                      onComplete={() => {
-                        toast({
-                          title: "Quiz Completed",
-                          description: "Great job on the assessment!",
-                        });
-                        setProgress((prev) => Math.min(prev + 15, 100));
-                      }}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Practice Section - Refined */}
-          <TabsContent value="practice" className="focus-visible:outline-none focus-visible:ring-0">
-            <Card className="border border-gray-800 dark:border-gray-800 shadow-md animate-fade-in bg-gray-900">
-              <CardHeader className="bg-gradient-to-r from-purple-900 to-purple-800 p-6">
-                <Badge className="w-fit bg-white/20 text-white mb-3">
-                  HANDS-ON
-                </Badge>
-                <CardTitle className="text-xl md:text-2xl text-white flex items-center">
-                  <Code className="mr-3 h-5 w-5" />
-                  Coding Practice
-                </CardTitle>
-                <CardDescription className="text-purple-100">
-                  Apply your knowledge through practical exercises
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent className="p-6">
-                <div className="space-y-6">
-                  <div className="bg-gray-800/50 dark:bg-gray-800/50 p-5 rounded-lg border border-gray-700/50 dark:border-gray-700/50">
-                    <h3 className="text-lg font-medium mb-3 text-purple-400 dark:text-purple-400">Challenge: Responsive Navigation</h3>
-                    <p className="mb-3 text-gray-300 dark:text-gray-300 text-sm">Create a responsive navigation bar with the following features:</p>
-                    <ul className="list-disc list-inside mb-4 text-gray-300 dark:text-gray-300 text-sm space-y-1">
-                      <li>Logo/Brand name on the left</li>
-                      <li>Navigation links in the center</li>
-                      <li>Login/Signup buttons on the right</li>
-                      <li>Mobile-responsive design</li>
-                    </ul>
-                  </div>
-
-                  <CodeEditor
-                    initialCode={`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Responsive Navigation</title>
-  <style>
-    /* Your CSS here */
-    
-  </style>
-</head>
-<body>
-  <!-- Your HTML here -->
+<div className="flex flex-col md:flex-row gap-4 mb-8">
+  <div className="flex-1 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 p-5 rounded-lg border border-indigo-100 dark:border-gray-700 shadow-sm">
+    <h4 className="font-semibold mb-3 text-indigo-700 dark:text-indigo-400">Typical Front-End Skills</h4>
+    <ul className="space-y-2 text-gray-700 dark:text-gray-300">
+      <li className="flex items-center gap-2">
+        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500"></div>
+        <span>HTML5 & Semantic Markup</span>
+      </li>
+      <li className="flex items-center gap-2">
+        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500"></div>
+        <span>CSS & Layout Techniques</span>
+      </li>
+      <li className="flex items-center gap-2">
+        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500"></div>
+        <span>JavaScript & DOM Manipulation</span>
+      </li>
+      <li className="flex items-center gap-2">
+        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500"></div>
+        <span>React, Vue, or Angular</span>
+      </li>
+      <li className="flex items-center gap-2">
+        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500"></div>
+        <span>Responsive Design</span>
+      </li>
+    </ul>
+  </div>
   
-</body>
-</html>`}
-                    onSave={() => {
-                      toast({
-                        title: "Code Saved",
-                        description: "Your solution has been stored",
-                      });
-                      setProgress((prev) => Math.min(prev + 20, 100));
-                    }}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+  <div className="flex-1 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 p-5 rounded-lg border border-blue-100 dark:border-gray-700 shadow-sm">
+    <h4 className="font-semibold mb-3 text-blue-700 dark:text-blue-400">Typical Back-End Skills</h4>
+    <ul className="space-y-2 text-gray-700 dark:text-gray-300">
+      <li className="flex items-center gap-2">
+        <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
+        <span>Server-side Programming</span>
+      </li>
+      <li className="flex items-center gap-2">
+        <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
+        <span>Database Management</span>
+      </li>
+      <li className="flex items-center gap-2">
+        <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
+        <span>API Development</span>
+      </li>
+      <li className="flex items-center gap-2">
+        <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
+        <span>Authentication & Security</span>
+      </li>
+      <li className="flex items-center gap-2">
+        <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
+        <span>Server Configuration</span>
+      </li>
+    </ul>
+  </div>
+</div>
 
-      {/* Community Section - Refined */}
-      <div className="max-w-6xl mx-auto px-4 mt-10">
-        <Card className="border border-gray-800 dark:border-gray-800 shadow-md animate-fade-in bg-gray-900">
-          <CardHeader className="bg-gradient-to-r from-purple-900 to-purple-800 p-6">
-            <Badge className="w-fit bg-white/20 text-white mb-3">
-              COMMUNITY
-            </Badge>
-            <CardTitle className="text-xl md:text-2xl text-white flex items-center">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="mr-3" strokeWidth={2}>
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-              </svg>
-              Developer Community
-            </CardTitle>
-            <CardDescription className="text-purple-100">
-              Connect with fellow developers and share knowledge
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-gray-800 dark:bg-gray-800 p-5 rounded-lg border border-gray-700 dark:border-gray-700 shadow-sm transition-all duration-300 hover:shadow-md">
-                <h3 className="font-medium text-lg text-purple-400 dark:text-purple-400 flex items-center gap-2">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M12 8v8"></path>
-                    <path d="M8 12h8"></path>
-                  </svg>
-                  Discussion Forums
-                </h3>
-                <p className="mt-2 text-gray-300 dark:text-gray-300 text-sm">
-                  Join topic-based discussion groups to ask questions and share solutions with the community.
-                </p>
-                <Button variant="outline" size="sm" className="mt-4 border-purple-700 dark:border-purple-700 text-purple-400 dark:text-purple-400 hover:bg-purple-900/20 dark:hover:bg-purple-900/20 transition-all duration-300">
-                  Browse Forums
-                </Button>
-              </div>
-
-              <div className="bg-gray-800 dark:bg-gray-800 p-5 rounded-lg border border-gray-700 dark:border-gray-700 shadow-sm transition-all duration-300 hover:shadow-md">
-                <h3 className="font-medium text-lg text-purple-400 dark:text-purple-400 flex items-center gap-2">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                  </svg>
-                  Live Chat
-                </h3>
-                <p className="mt-2 text-gray-300 dark:text-gray-300 text-sm">
-                  Real-time conversations with peers and mentors to solve problems and share ideas.
-                </p>
-                <Button variant="outline" size="sm" className="mt-4 border-purple-700 dark:border-purple-700 text-purple-400 dark:text-purple-400 hover:bg-purple-900/20 dark:hover:bg-purple-900/20 transition-all duration-300">
-                  Join Chat
-                </Button>
-              </div>
-
-              <div className="bg-gray-800 dark:bg-gray-800 p-5 rounded-lg border border-gray-700 dark:border-gray-700 shadow-sm transition-all duration-300 hover:shadow-md">
-                <h3 className="font-medium text-lg text-purple-400 dark:text-purple-400 flex items-center gap-2">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                    <path d="M21 15l-5-5L5 21"></path>
-                  </svg>
-                  Project Showcase
-                </h3>
-                <p className="mt-2 text-gray-300 dark:text-gray-300 text-sm">
-                  Share your completed projects and get feedback from the community.
-                </p>
-                <Button variant="outline" size="sm" className="mt-4 border-purple-700 dark:border-purple-700 text-purple-400 dark:text-purple-400 hover:bg-purple-900/20 dark:hover:bg-purple-900/20 transition-all duration-300">
-                  View Showcase
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Upcoming Events Section */}
-      <div className="max-w-6xl mx-auto px-4 mt-10">
-        <Card className="border border-gray-800 dark:border-gray-800 shadow-md animate-fade-in bg-gray-900">
-          <CardHeader className="bg-gradient-to-r from-purple-900 to-purple-800 p-6">
-            <Badge className="w-fit bg-white/20 text-white mb-3">
-              EVENTS
-            </Badge>
-            <CardTitle className="text-xl md:text-2xl text-white flex items-center">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="mr-3" strokeWidth={2}>
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-              Upcoming Events
-            </CardTitle>
-            <CardDescription className="text-purple-100">
-              Workshops, webinars, and meetups to enhance your skills
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              {/* Event 1 */}
-              <div className="flex flex-col md:flex-row gap-4 bg-gray-800 dark:bg-gray-800 p-4 rounded-lg border border-gray-700 dark:border-gray-700 overflow-hidden">
-                <div className="flex-shrink-0 w-full md:w-36 h-24 bg-purple-900/30 dark:bg-purple-900/30 rounded-md flex flex-col items-center justify-center">
-                  <span className="text-xl font-bold text-purple-400 dark:text-purple-400">MAY</span>
-                  <span className="text-2xl font-bold text-white dark:text-white">15</span>
-                </div>
-                <div className="flex-grow">
-                  <h3 className="font-medium text-lg text-purple-400 dark:text-purple-400">Advanced React Patterns Workshop</h3>
-                  <p className="text-sm text-gray-300 dark:text-gray-300 mt-1">Learn about React's advanced patterns for scalable component composition.</p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <Badge variant="outline" className="border-purple-700/50 dark:border-purple-700/50 text-purple-400 dark:text-purple-400">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="mr-1">
-                        <path d="M12 2v2"></path>
-                        <path d="M12 20v2"></path>
-                        <path d="M2 12h2"></path>
-                        <path d="M20 12h2"></path>
-                        <path d="M18.36 18.36l-1.41-1.41"></path>
-                        <path d="M5.64 5.64l1.41 1.41"></path>
-                        <path d="M18.36 5.64l-1.41 1.41"></path>
-                        <path d="M5.64 18.36l1.41-1.41"></path>
-                      </svg>
-                      Advanced
-                    </Badge>
-                    <Badge variant="outline" className="border-purple-700/50 dark:border-purple-700/50 text-purple-400 dark:text-purple-400">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="mr-1">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                      </svg>
-                      2 Hours
-                    </Badge>
-                  </div>
-                </div>
-                <div className="flex-shrink-0 flex items-center justify-center md:justify-end mt-3 md:mt-0">
-                  <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition-all duration-300">
-                    Register
-                  </Button>
-                </div>
-              </div>
-
-              {/* Event 2 */}
-              <div className="flex flex-col md:flex-row gap-4 bg-gray-800 dark:bg-gray-800 p-4 rounded-lg border border-gray-700 dark:border-gray-700 overflow-hidden">
-                <div className="flex-shrink-0 w-full md:w-36 h-24 bg-purple-900/30 dark:bg-purple-900/30 rounded-md flex flex-col items-center justify-center">
-                  <span className="text-xl font-bold text-purple-400 dark:text-purple-400">MAY</span>
-                  <span className="text-2xl font-bold text-white dark:text-white">22</span>
-                </div>
-                <div className="flex-grow">
-                  <h3 className="font-medium text-lg text-purple-400 dark:text-purple-400">Full-Stack Development with Next.js</h3>
-                  <p className="text-sm text-gray-300 dark:text-gray-300 mt-1">Explore how to build complete applications with Next.js and modern backend technologies.</p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <Badge variant="outline" className="border-purple-700/50 dark:border-purple-700/50 text-purple-400 dark:text-purple-400">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="mr-1">
-                        <rect x="2" y="2" width="20" height="20" rx="5"></rect>
-                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                        <line x1="17.5" y1="6.5" x2="17.5" y2="6.5"></line>
-                      </svg>
-                      Intermediate
-                    </Badge>
-                    <Badge variant="outline" className="border-purple-700/50 dark:border-purple-700/50 text-purple-400 dark:text-purple-400">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="mr-1">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                      </svg>
-                      3 Hours
-                    </Badge>
-                  </div>
-                </div>
-                <div className="flex-shrink-0 flex items-center justify-center md:justify-end mt-3 md:mt-0">
-                  <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition-all duration-300">
-                    Register
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Footer Section */}
-      <footer className="max-w-6xl mx-auto px-4 mt-12 py-6 border-t border-gray-800 dark:border-gray-800">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center space-x-2">
-            <Code className="h-5 w-5 text-purple-500 dark:text-purple-400" strokeWidth={2.5} />
-            <span className="font-semibold text-white dark:text-white">WebDevPath</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-gray-400 dark:text-gray-400 text-sm">
-            <a href="#" className="hover:text-purple-400 dark:hover:text-purple-400 transition-colors duration-200">About</a>
-            <span>•</span>
-            <a href="#" className="hover:text-purple-400 dark:hover:text-purple-400 transition-colors duration-200">Privacy</a>
-            <span>•</span>
-            <a href="#" className="hover:text-purple-400 dark:hover:text-purple-400 transition-colors duration-200">Terms</a>
-            <span>•</span>
-            <a href="#" className="hover:text-purple-400 dark:hover:text-purple-400 transition-colors duration-200">Contact</a>
-          </div>
-
-          <div className="flex gap-3">
-            <Button variant="ghost" size="icon" className="rounded-full bg-gray-800/50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-400 hover:text-purple-400 dark:hover:text-purple-400">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
-              </svg>
-            </Button>
-            <Button variant="ghost" size="icon" className="rounded-full bg-gray-800/50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-400 hover:text-purple-400 dark:hover:text-purple-400">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-              </svg>
-            </Button>
-            <Button variant="ghost" size="icon" className="rounded-full bg-gray-800/50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-400 hover:text-purple-400 dark:hover:text-purple-400">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-              </svg>
-            </Button>
-          </div>
-        </div>
-
-        <div className="text-center mt-6 text-xs text-gray-500 dark:text-gray-500">
-          © 2025 WebDevPath. All rights reserved.
-        </div>
-      </footer>
+<div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 p-5 rounded-lg shadow-sm">
+  <h4 className="font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-2 mb-3">
+    <HelpCircle className="h-4 w-4" /> Why Learn Web Development?
+  </h4>
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-gray-700 dark:text-gray-300">
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+      <h5 className="font-medium text-indigo-600 dark:text-indigo-400 mb-2">High Demand</h5>
+      <p className="text-sm">Web developers are consistently among the most sought-after professionals in the tech industry.</p>
     </div>
-  );
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+      <h5 className="font-medium text-indigo-600 dark:text-indigo-400 mb-2">Creative Freedom</h5>
+      <p className="text-sm">Express your creativity while solving complex problems with elegant solutions.</p>
+    </div>
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+      <h5 className="font-medium text-indigo-600 dark:text-indigo-400 mb-2">Remote Work</h5>
+      <p className="text-sm">Enjoy the flexibility of working from anywhere with just a computer and internet connection.</p>
+    </div>
+  </div>
+</div>
+</div>
+</CardContent>
+</Card>
+</TabsContent>
+
+{/* Resources Section */}
+<TabsContent value="resources" className="min-h-[500px]">
+<ResourceList resources={resources} />
+</TabsContent>
+
+{/* Quiz Section */}
+<TabsContent value="quiz" className="min-h-[500px]">
+<QuizSection />
+</TabsContent>
+
+{/* Practice Section */}
+<TabsContent value="practice" className="min-h-[500px]">
+<Card className="border-0 shadow-lg bg-white/95 dark:bg-gray-900/90 backdrop-blur-md">
+<CardHeader className="bg-purple-600">
+  <div className="relative z-10">
+    <Badge className="bg-white/10 text-xs mb-2 font-normal px-2 py-1">
+      HANDS-ON PRACTICE
+    </Badge>
+    <CardTitle className="text-2xl font-bold tracking-tight text-white flex items-center">
+      <Code className="mr-3 h-6 w-6" /> 
+      Interactive Coding Environment
+    </CardTitle>
+    <CardDescription className="text-purple-100 mt-2">
+      Apply what you've learned in a real coding environment
+    </CardDescription>
+  </div>
+</CardHeader>
+
+<CardContent className="p-6">
+  <div className="mb-6">
+    <h3 className="text-lg font-semibold mb-2 text-purple-700 dark:text-purple-400">Task: Create a Simple Button Component</h3>
+    <p className="text-gray-700 dark:text-gray-300 mb-4">
+      Practice your HTML and CSS skills by creating a styled button component.
+    </p>
+  </div>
+  
+  <div className="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-6">
+    <CodeEditor 
+      initialCode={`
+<!-- Create a button with these requirements: -->
+<!-- 1. Use proper HTML5 semantic elements -->
+<!-- 2. Style it with CSS to have rounded corners -->
+<!-- 3. Add a hover effect -->
+<!-- 4. Include an icon (you can use emoji) -->
+
+<button class="custom-button">
+  <!-- Your code here -->
+</button>
+
+<style>
+  .custom-button {
+    /* Your styles here */
+  }
+</style>
+      `}
+      language="html"
+      height="300px"
+    />
+  </div>
+  
+  <div className="flex gap-3 justify-end">
+    <Button 
+      variant="outline" 
+      className="border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/50"
+      onClick={() => toast({
+        title: "Hint",
+        description: "Try using padding, border-radius, and transition properties for a smooth effect.",
+      })}
+    >
+      Get Hint
+    </Button>
+    
+    <Button 
+      className="bg-purple-600 hover:bg-purple-700" 
+      onClick={() => toast({
+        title: "Code submitted!",
+        description: "Great job on completing the practice exercise.",
+      })}
+    >
+      Submit Solution
+    </Button>
+  </div>
+</CardContent>
+</Card>
+</TabsContent>
+</Tabs>
+</div>
+
+{/* Community Section */}
+<div className="max-w-6xl mx-auto px-4 mt-16">
+<Card className="border-0 overflow-hidden shadow-xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
+<CardContent className="p-8">
+  <div className="flex flex-col md:flex-row gap-8 items-center">
+    <div className="md:w-2/3 space-y-4">
+      <Badge className="bg-white/10 backdrop-blur-md text-white hover:bg-white/20 px-3 py-1">
+        JOIN THE COMMUNITY
+      </Badge>
+      <h2 className="text-3xl font-bold tracking-tight">Connect with Fellow Space Travelers</h2>
+      <p className="text-purple-100">
+        Share your journey, ask questions, and collaborate with other developers exploring the web development universe.
+      </p>
+      <div className="flex gap-3 mt-4">
+        <Button className="bg-white text-purple-700 hover:bg-purple-100">
+          Join Discord
+        </Button>
+        <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+          Browse Forums
+        </Button>
+      </div>
+    </div>
+    
+    <div className="md:w-1/3 flex justify-center">
+      {/* Abstract community illustration */}
+      <div className="relative w-48 h-48">
+        <div className="absolute inset-0 bg-white/10 backdrop-blur-md rounded-full"></div>
+        
+        {/* Community nodes */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-purple-400/80 rounded-full flex items-center justify-center">
+          <div className="h-16 w-16 bg-white/90 rounded-full flex items-center justify-center">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-purple-600">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+        </div>
+        
+        {/* Connecting lines and nodes */}
+        {[...Array(6)].map((_, i) => {
+          const angle = (i * Math.PI * 2) / 6;
+          const distance = 80;
+          const x = Math.cos(angle) * distance;
+          const y = Math.sin(angle) * distance;
+          
+          return (
+            <React.Fragment key={`connection-${i}`}>
+              <div 
+                className="absolute top-1/2 left-1/2 w-1 bg-white/30"
+                style={{
+                  height: `${distance * 0.8}px`,
+                  transform: `translate(-50%, 0%) rotate(${angle + Math.PI/2}rad)`,
+                  transformOrigin: 'center bottom',
+                }}
+              ></div>
+              
+              <div
+                className="absolute w-8 h-8 bg-indigo-500/80 rounded-full flex items-center justify-center shadow-lg"
+                style={{
+                  top: `calc(50% + ${y}px)`,
+                  left: `calc(50% + ${x}px)`,
+                  transform: 'translate(-50%, -50%)',
+                }}
+              >
+                <div className="h-4 w-4 bg-white/90 rounded-full"></div>
+              </div>
+            </React.Fragment>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+</CardContent>
+</Card>
+</div>
+
+{/* Footer */}
+<footer className="mt-20 bg-indigo-950/30 backdrop-blur-md border-t border-indigo-900/50 py-8">
+<div className="max-w-6xl mx-auto px-4">
+  <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+    <div className="flex items-center gap-2">
+      <Code className="text-indigo-400 h-5 w-5" />
+      <span className="text-indigo-200 font-medium">Web Development Odyssey</span>
+    </div>
+    
+    <div className="text-indigo-300/60 text-sm">
+      Embark on your journey through the cosmos of web development.
+    </div>
+    
+    <div className="flex gap-4">
+      <Button variant="ghost" size="icon" className="text-indigo-300 hover:text-indigo-200 hover:bg-indigo-900/50">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+        </svg>
+      </Button>
+      
+      <Button variant="ghost" size="icon" className="text-indigo-300 hover:text-indigo-200 hover:bg-indigo-900/50">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M24 11.7c0 6.45-5.27 11.68-11.78 11.68-2.07 0-4-.53-5.7-1.45L0 24l2.13-6.27a11.57 11.57 0 0 1-1.7-6.04C.44 5.23 5.72 0 12.23 0 18.72 0 24 5.23 24 11.7M12.22 1.85c-5.46 0-9.9 4.41-9.9 9.83 0 2.15.7 4.14 1.88 5.76L2.96 21.1l3.8-1.2a9.9 9.9 0 0 0 5.46 1.62c5.46 0 9.9-4.4 9.9-9.83a9.88 9.88 0 0 0-9.9-9.83m5.95 12.52c-.08-.12-.27-.19-.56-.33-.28-.14-1.7-.84-1.97-.93-.26-.1-.46-.15-.65.14-.2.29-.75.93-.92 1.12-.17.2-.34.22-.63.07-.29-.15-1.22-.45-2.32-1.43a8.64 8.64 0 0 1-1.6-1.98c-.18-.29-.02-.44.12-.58.13-.13.29-.34.43-.5.15-.17.2-.3.29-.48.1-.2.05-.36-.02-.5-.08-.15-.65-1.56-.9-2.13-.24-.58-.48-.48-.65-.48-.17 0-.37-.03-.56-.03-.2 0-.5.08-.77.36-.26.29-1 .98-1 2.4 0 1.4 1.03 2.76 1.17 2.96.14.19 2 3.17 4.93 4.32 2.94 1.15 2.94.77 3.47.72.53-.05 1.7-.7 1.95-1.36.24-.67.24-1.25.17-1.37"/>
+        </svg>
+      </Button>
+      
+      <Button variant="ghost" size="icon" className="text-indigo-300 hover:text-indigo-200 hover:bg-indigo-900/50">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/>
+        </svg>
+      </Button>
+    </div>
+  </div>
+</div>
+</footer>
+</div>
+);
 };
 
 export default WebDevelopmentCourse;
