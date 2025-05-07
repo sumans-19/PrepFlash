@@ -169,7 +169,7 @@ const AptitudeBrushUp = () => {
       
       <div className="container max-w-6xl mx-auto pt-20 pb-16 px-4">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#9b87f5] to-[#7E69AB]">
             Aptitude Topic Brush-Up
           </h1>
           <p className="text-slate-300">

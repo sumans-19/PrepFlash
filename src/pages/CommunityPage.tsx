@@ -7,7 +7,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { 
+import {
   Users, Award, CalendarDays, MessageSquare, Star,
   Trophy, Bell, Settings, Link, Share2, Edit, User,
   BookOpen, LayoutList, LayoutDashboard, Sparkles,
@@ -26,7 +26,7 @@ const Leaderboard = () => {
     { id: 4, name: "Morgan Lee", points: 760, streak: 7, solved: 24, avatar: "https://i.pravatar.cc/150?img=4" },
     { id: 5, name: "Casey Brown", points: 650, streak: 5, solved: 19, avatar: "https://i.pravatar.cc/150?img=5" },
   ]);
-  
+
   useEffect(() => {
     const sortedUsers = [...users].sort((a, b) => {
       if (sortBy === "points") return b.points - a.points;
@@ -84,24 +84,24 @@ const Leaderboard = () => {
       </CardHeader>
       <CardContent>
         <div className="flex mb-4 border-b border-slate-800 pb-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setSortBy("points")}
             className={sortBy === "points" ? "border-b-2 border-primary rounded-none" : ""}
           >
             Points
           </Button>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={() => setSortBy("streak")}
             className={sortBy === "streak" ? "border-b-2 border-primary rounded-none" : ""}
           >
             Streak
           </Button>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={() => setSortBy("solved")}
             className={sortBy === "solved" ? "border-b-2 border-primary rounded-none" : ""}
@@ -109,10 +109,10 @@ const Leaderboard = () => {
             Problems Solved
           </Button>
         </div>
-        
+
         <div className="space-y-4">
           {users.map((user, index) => (
-            <motion.div 
+            <motion.div
               key={user.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -143,6 +143,9 @@ const Leaderboard = () => {
         <Button variant="outline" className="w-full">
           View Full Leaderboard
         </Button>
+      <Button variant="outline" className="w-full">
+        View Daily Challenges
+      </Button>
       </CardFooter>
     </Card>
   );
@@ -154,7 +157,7 @@ const DailyStreak = () => {
   const [currentStreak, setCurrentStreak] = useState(7);
   const [longestStreak, setLongestStreak] = useState(14);
   const [todayCompleted, setTodayCompleted] = useState(false);
-  
+
   // Mock days of the week with completion status
   const [weekData, setWeekData] = useState([
     { day: "Mon", completed: true },
@@ -169,16 +172,16 @@ const DailyStreak = () => {
   const handleCompleteChallenge = () => {
     setTodayCompleted(true);
     setCurrentStreak(currentStreak + 1);
-    
-    const updatedWeekData = weekData.map((item, index) => 
+
+    const updatedWeekData = weekData.map((item, index) =>
       index === 6 ? { ...item, completed: true } : item
     );
     setWeekData(updatedWeekData);
-    
+
     if (currentStreak + 1 > longestStreak) {
       setLongestStreak(currentStreak + 1);
     }
-    
+
     toast({
       title: "Daily challenge completed!",
       description: `You've maintained a ${currentStreak + 1}-day streak. Keep it up!`,
@@ -199,16 +202,15 @@ const DailyStreak = () => {
       <CardContent className="space-y-6">
         <div className="grid grid-cols-7 gap-2">
           {weekData.map((item, index) => (
-            <motion.div 
+            <motion.div
               key={index}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: index * 0.1, duration: 0.3 }}
-              className={`flex flex-col items-center justify-center p-3 rounded-lg ${
-                item.completed 
-                  ? "bg-primary/20 border border-primary/30" 
+              className={`flex flex-col items-center justify-center p-3 rounded-lg ${item.completed
+                  ? "bg-primary/20 border border-primary/30"
                   : "bg-slate-800/50 border border-slate-700/30"
-              }`}
+                }`}
             >
               <div className="text-sm font-medium">{item.day}</div>
               <div className="mt-1">
@@ -246,7 +248,7 @@ const DailyStreak = () => {
               </p>
             </CardContent>
             <CardFooter>
-              <Button 
+              <Button
                 className="w-full"
                 disabled={todayCompleted}
                 onClick={handleCompleteChallenge}
@@ -266,7 +268,7 @@ const DiscussionForum = () => {
   const { toast } = useToast();
   const [activeCategory, setActiveCategory] = useState("all");
   const [newPost, setNewPost] = useState("");
-  
+
   const [posts, setPosts] = useState([
     {
       id: 1,
@@ -305,7 +307,7 @@ const DiscussionForum = () => {
 
   const handlePostSubmit = () => {
     if (!newPost.trim()) return;
-    
+
     const newPostObj = {
       id: posts.length + 1,
       author: "You",
@@ -317,10 +319,10 @@ const DiscussionForum = () => {
       comments: 0,
       time: "Just now",
     };
-    
+
     setPosts([newPostObj, ...posts]);
     setNewPost("");
-    
+
     toast({
       title: "Post created!",
       description: "Your discussion has been posted to the forum.",
@@ -333,11 +335,11 @@ const DiscussionForum = () => {
   };
 
   const handleLike = (postId: number) => {
-    setPosts(posts.map(post => 
+    setPosts(posts.map(post =>
       post.id === postId ? { ...post, likes: post.likes + 1 } : post
     ));
   };
-  
+
   return (
     <Card className="shadow-lg border-0 bg-gradient-to-br from-indigo-950/70 to-slate-900/90 backdrop-blur-md">
       <CardHeader>
@@ -366,7 +368,7 @@ const DiscussionForum = () => {
             </Button>
           </div>
         </div>
-        
+
         {/* Categories */}
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
           <Button
@@ -410,7 +412,7 @@ const DiscussionForum = () => {
             Career Advice
           </Button>
         </div>
-        
+
         {/* Posts list */}
         <div className="space-y-4">
           {filterPosts().map((post, index) => (
@@ -442,9 +444,9 @@ const DiscussionForum = () => {
                   <p className="text-sm text-muted-foreground">{post.content}</p>
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="text-muted-foreground"
                     onClick={() => handleLike(post.id)}
                   >
@@ -508,10 +510,10 @@ const StudyGroups = () => {
   ]);
 
   const handleJoin = (groupId: number) => {
-    setGroups(groups.map(group => 
+    setGroups(groups.map(group =>
       group.id === groupId ? { ...group, members: group.members + 1 } : group
     ));
-    
+
     toast({
       title: "Group joined!",
       description: "You've successfully joined the study group.",
@@ -560,7 +562,7 @@ const StudyGroups = () => {
                   </div>
                   <div>
                     <div className="h-2 w-32 bg-slate-800 rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className="h-full bg-gradient-to-r from-emerald-500 to-blue-500"
                         style={{ width: `${(group.members / group.capacity) * 100}%` }}
                       />
@@ -569,9 +571,9 @@ const StudyGroups = () => {
                 </div>
               </CardContent>
               <CardFooter className="pt-0">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full"
                   onClick={() => handleJoin(group.id)}
                   disabled={group.members >= group.capacity}
@@ -613,7 +615,7 @@ const Achievements = () => {
       date: "5 days ago"
     }
   ]);
-  
+
   const [inProgressAchievements, setInProgressAchievements] = useState([
     {
       id: 3,
@@ -689,7 +691,7 @@ const Achievements = () => {
             </div>
           </div>
         )}
-        
+
         <div>
           <h3 className="text-sm font-medium mb-3 text-muted-foreground">In Progress</h3>
           <div className="space-y-3">
@@ -725,7 +727,7 @@ const Achievements = () => {
             ))}
           </div>
         </div>
-        
+
         <Button variant="outline" className="w-full">
           <Award className="h-4 w-4 mr-2" />
           View All Achievements
@@ -772,13 +774,13 @@ const ResourceHub = () => {
   ]);
 
   const handleStar = (resourceId: number) => {
-    setResources(resources.map(resource => 
+    setResources(resources.map(resource =>
       resource.id === resourceId ? { ...resource, stars: resource.stars + 1 } : resource
     ));
   };
 
   const handleDownload = (resourceId: number) => {
-    setResources(resources.map(resource => 
+    setResources(resources.map(resource =>
       resource.id === resourceId ? { ...resource, downloads: resource.downloads + 1 } : resource
     ));
   };
@@ -821,7 +823,7 @@ const ResourceHub = () => {
             Saved
           </Button>
         </div>
-        
+
         <div className="space-y-3">
           {resources.map((resource, index) => (
             <motion.div
@@ -850,9 +852,9 @@ const ResourceHub = () => {
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="h-8 w-8"
                   onClick={() => handleStar(resource.id)}
                 >
@@ -861,9 +863,9 @@ const ResourceHub = () => {
                     {resource.stars}
                   </div>
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="h-8 w-8"
                   onClick={() => handleDownload(resource.id)}
                 >
@@ -876,7 +878,7 @@ const ResourceHub = () => {
             </motion.div>
           ))}
         </div>
-        
+
         <Button variant="outline" className="w-full">
           <BookOpen className="h-4 w-4 mr-2" />
           Browse All Resources
@@ -900,14 +902,14 @@ const MockInterviewScheduler = () => {
       status: "upcoming",
     },
   ]);
-  
+
   const [slots] = useState([
     { id: 1, date: "May 7, 2025", time: "10:00 AM", interviewer: "Taylor Kim", expertise: "Algorithms" },
     { id: 2, date: "May 7, 2025", time: "2:30 PM", interviewer: "Jamie Smith", expertise: "Frontend" },
     { id: 3, date: "May 8, 2025", time: "11:00 AM", interviewer: "Morgan Lee", expertise: "System Design" },
     { id: 4, date: "May 9, 2025", time: "4:00 PM", interviewer: "Casey Brown", expertise: "Behavioral" },
   ]);
-  
+
   const handleBookSlot = (slotId: number) => {
     toast({
       title: "Interview booked!",
@@ -966,8 +968,8 @@ const MockInterviewScheduler = () => {
                     <span>With {interview.interviewer}</span>
                   </div>
                   <div className="mt-3 flex justify-end">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => handleCancelInterview(interview.id)}
                     >
@@ -979,7 +981,7 @@ const MockInterviewScheduler = () => {
             </div>
           </div>
         )}
-        
+
         <div>
           <h3 className="text-sm font-medium mb-3 text-muted-foreground">Available Slots</h3>
           <div className="space-y-3">
@@ -1001,8 +1003,8 @@ const MockInterviewScheduler = () => {
                   <div className="text-sm text-muted-foreground">
                     {slot.time} with {slot.interviewer}
                   </div>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="outline"
                     onClick={() => handleBookSlot(slot.id)}
                   >
@@ -1013,7 +1015,7 @@ const MockInterviewScheduler = () => {
             ))}
           </div>
         </div>
-        
+
         <div className="flex justify-center">
           <Button>
             <CalendarDays className="h-4 w-4 mr-2" />
@@ -1029,7 +1031,7 @@ const MockInterviewScheduler = () => {
 const CollaborativeWhiteboard = () => {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
-  
+
   const handleStartSession = () => {
     setIsOpen(true);
     toast({
@@ -1065,7 +1067,7 @@ const CollaborativeWhiteboard = () => {
             </Button>
           </div>
         </div>
-        
+
         <div className="mt-4 grid grid-cols-2 gap-3">
           <Card className="bg-slate-900/50 p-3">
             <div className="text-xs font-medium mb-1">Features</div>
@@ -1113,12 +1115,12 @@ const CommunityPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-background/90 to-slate-950/90">
       {/* Add DashboardNav component at the top */}
       <DashboardNav />
-      
+
       {/* Hero section with animated background */}
       <div className="relative py-20 px-4 overflow-hidden">
         {/* Animated background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 to-slate-950/30" />
-        
+
         {/* Animated dots/circles */}
         <div className="absolute inset-0 overflow-hidden">
           {[...Array(20)].map((_, i) => (
@@ -1137,7 +1139,7 @@ const CommunityPage = () => {
                   Math.random() * 100 - 50 + "%",
                 ],
                 y: [
-                  Math.random() * 100 - 50 + "%", 
+                  Math.random() * 100 - 50 + "%",
                   Math.random() * 100 - 50 + "%",
                   Math.random() * 100 - 50 + "%",
                 ],
@@ -1156,10 +1158,10 @@ const CommunityPage = () => {
             />
           ))}
         </div>
-        
+
         {/* Content */}
         <div className="container mx-auto max-w-6xl relative z-10">
-          <motion.div 
+          <motion.div
             className="text-center mb-6"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1172,7 +1174,7 @@ const CommunityPage = () => {
               Prepare together, succeed together. Join our community features to enhance your interview preparation experience.
             </p>
           </motion.div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1193,7 +1195,7 @@ const CommunityPage = () => {
                 </div>
               </Button>
             </motion.div>
-            
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1213,7 +1215,7 @@ const CommunityPage = () => {
                 </div>
               </Button>
             </motion.div>
-            
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1236,7 +1238,7 @@ const CommunityPage = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Main content */}
       <div className="container mx-auto max-w-6xl px-4 pb-20">
         <Tabs defaultValue="leaderboard" className="mb-8">
@@ -1264,23 +1266,23 @@ const CommunityPage = () => {
               </TabsTrigger>
             </TabsList>
           </div>
-          
+
           <TabsContent value="leaderboard" className="space-y-8">
             <Leaderboard />
           </TabsContent>
-          
+
           <TabsContent value="dailyStreak" className="space-y-8">
             <DailyStreak />
           </TabsContent>
-          
+
           <TabsContent value="forum" className="space-y-8">
             <DiscussionForum />
           </TabsContent>
-          
+
           <TabsContent value="study" className="space-y-8">
             <StudyGroups />
           </TabsContent>
-          
+
           <TabsContent value="more" className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <Achievements />

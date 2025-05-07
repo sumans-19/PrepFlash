@@ -9,6 +9,7 @@ import { useTheme } from '@/components/ui/theme-provider';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 
+
 interface SectionCardProps {
   title: string;
   icon: React.ReactNode;
@@ -137,7 +138,7 @@ const Dashboard = () => {
         "Key concepts and logic training",
         "Progressive learning modules"
       ],
-      to: "/prep-toolkit",
+      to: "/behavioral-mastery",
       accentColor: "#D6BCFA"
     },
     {
@@ -150,7 +151,7 @@ const Dashboard = () => {
         "Company requirements tracking",
         "Emerging technologies updates"
       ],
-      to: "/learning",
+      to: "/learningtoolkit",
       accentColor: "#33C3F0"
     },
     {
@@ -202,7 +203,7 @@ const Dashboard = () => {
         "Emerging technology updates",
         "Company-specific news"
       ],
-      to: "/tech-news",
+      to: "/daily-challenge",
       accentColor: "#BD93F9"
     },
   ];

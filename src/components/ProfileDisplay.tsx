@@ -479,19 +479,27 @@ const ProfileDisplay = () => {
                   <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-5 rounded-lg text-center hover-lift transition-all">
                     <h3 className="font-medium mb-2 text-gray-900">Mock Interviews</h3>
                     <p className="text-sm text-gray-600 mb-3">Practice for your dream job</p>
-                    <Button variant="outline" size="sm" disabled>Coming soon</Button>
+                    <Link to="/">
+                    <Button variant="outline" size="sm" >Coming soon</Button>
+                    </Link>
                   </div>
 
                   <div className="bg-gradient-to-r from-blue-50 to-sky-50 p-5 rounded-lg text-center hover-lift transition-all">
                     <h3 className="font-medium mb-2 text-gray-900">Resume Builder</h3>
                     <p className="text-sm text-gray-600 mb-3">Create a professional resume</p>
-                    <Button variant="outline" size="sm" disabled>Coming soon</Button>
+                    <Link to="/">
+                    <Button variant="outline" size="sm" >Coming soon</Button>
+                    </Link>
                   </div>
 
                   <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-5 rounded-lg text-center hover-lift transition-all">
                     <h3 className="font-medium mb-2 text-gray-900">Interview Tips</h3>
                     <p className="text-sm text-gray-600 mb-3">Expert advice for success</p>
-                    <Button variant="outline" size="sm" disabled>Coming soon</Button>
+                    
+                    <Link to="/">
+                    <Button variant="outline" size="sm" >Coming soon 
+                    </Button>
+                    </Link>
                   </div>
                 </div>
               </Card>

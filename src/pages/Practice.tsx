@@ -24,7 +24,7 @@ const practiceTypes = [
     description: "Simulate real interview environments with comprehensive video analysis.",
     features: ["Body language analysis", "Expression feedback", "Professional evaluation"],
     gradient: ["#7E69AB", "#D6BCFA"],
-    to: "/video-practice"
+    to: "/video-mode"
   },
   {
     id: "voice",

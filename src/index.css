@@ -163,5 +163,92 @@
     @apply bg-primary/20 text-primary border-primary/30;
   }
 }
+/* Flip Card Styles */
+@layer components {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+}
+@layer utilities {
+  .glassmorphism {
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-lg;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-primary;
+  }
+
+  .section-header {
+    @apply relative inline-block after:content-[''] after:absolute after:w-1/2 after:h-1 after:bg-primary after:bottom-0 after:left-0 after:rounded-full;
+  }
+}
+
+.code-editor {
+  font-family: 'JetBrains Mono', Menlo, Monaco, 'Courier New', monospace;
+}
+/* Dark mode specific styles */
+.dark .glassmorphism {
+  @apply bg-gray-800/50 backdrop-blur-md border border-gray-700/20 shadow-lg;
+}
+
+.dark .text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-purple-400 via-blue-400 to-indigo-400;
+}
+
+.dark .section-header {
+  @apply after:bg-purple-500;
+}
+
+.dark .code-editor {
+  @apply bg-gray-900 text-white border-gray-700;
+}
+
+@layer utilities {
+  .glassmorphism {
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-lg;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-primary;
+  }
+
+  .section-header {
+    @apply relative inline-block after:content-[''] after:absolute after:w-1/2 after:h-1 after:bg-primary after:bottom-0 after:left-0 after:rounded-full;
+  }
+  
+  /* Card flip utilities */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+}
+
+.code-editor {
+  font-family: 'JetBrains Mono', Menlo, Monaco, 'Courier New', monospace;
+}
+
 
 }
