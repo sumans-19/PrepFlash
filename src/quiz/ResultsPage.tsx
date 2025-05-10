@@ -5,6 +5,7 @@ import { QuizQuestion, QuizResult } from '@/types/index';
 import GeminiService from '@/services/GeminiService3';
 import { jobRoles } from '@/data/jobRoles';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { DashboardNav } from '@/components/DashboardNav';
 
 const ResultsPage: React.FC = () => {
     const { roleId } = useParams<{ roleId: string }>();
@@ -72,18 +73,8 @@ const ResultsPage: React.FC = () => {
 
     return (
         <>
-            <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border">
-                <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-
-                    {/* Logo + Brand Name */}
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                            Prep<span className="font-black">Toolkit</span>
-                        </h1>
-                    </div>
-                    <ThemeToggle></ThemeToggle>
-                </div>
-            </header>
+            <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+                  <DashboardNav />
             <div className="max-w-4xl mx-auto mt-8">
                 <button
                     onClick={() => navigate(`/prep-options/${roleId}`)}
@@ -204,6 +195,7 @@ const ResultsPage: React.FC = () => {
                         </button>
                     </div>
                 )}
+            </div>
             </div>
         </>
     );

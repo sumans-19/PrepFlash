@@ -1,10 +1,10 @@
 import React from 'react';
-import { useResumeContext } from '../../context/ResumeContext';
+import { useResume } from '../../context/ResumeContext';
 import FormSection from './FormSection';
 import TextInput from '../ui/TextInput';
 
 const TargetRoleForm: React.FC = () => {
-  const { resumeData, updateTargetRole } = useResumeContext();
+  const { resumeData, updateTargetRole } = useResume();
   const { targetRole } = resumeData;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -6,6 +6,7 @@ import QuestionCard from './QuestionCard';
 import GeminiService from '@/services/GeminiService3';
 import { jobRoles } from '@/data/jobRoles';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { DashboardNav } from '@/components/DashboardNav';
 
 const QuizPage: React.FC = () => {
   const { roleId } = useParams<{ roleId: string }>();
@@ -20,7 +21,7 @@ const QuizPage: React.FC = () => {
   const [quizFinished, setQuizFinished] = useState(false);
 
   const selectedRole = jobRoles.find(role => role.id === roleId);
-  const SECONDS_PER_QUESTION = 60; // 1 minute per question
+  const SECONDS_PER_QUESTION = 40; // 1 minute per question
 
   // Load quiz questions for the selected role
   useEffect(() => {
@@ -29,7 +30,7 @@ const QuizPage: React.FC = () => {
 
       try {
         setLoading(true);
-        const fetchedQuestions = await GeminiService.getQuizQuestions(roleId, 5);
+        const fetchedQuestions = await GeminiService.getQuizQuestions(roleId, 10);
         setQuestions(fetchedQuestions);
 
         // Initialize answers array with -1 (not answered)
@@ -117,18 +118,8 @@ const QuizPage: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-
-          {/* Logo + Brand Name */}
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Prep<span className="font-black">Toolkit</span>
-            </h1>
-          </div>
-          <ThemeToggle></ThemeToggle>
-        </div>
-      </header>
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+            <DashboardNav />
       <div className="max-w-4xl mx-auto mt-8">
         <button
           onClick={() => navigate(`/prep-options/${roleId}`)}
@@ -255,6 +246,7 @@ const QuizPage: React.FC = () => {
             )}
           </div>
         )}
+      </div>
       </div>
     </>
   );

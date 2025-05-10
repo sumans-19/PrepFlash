@@ -173,3 +173,11 @@ export interface ChatMessage {
   content: string;
   timestamp: Date;
 }
+
+export interface Template {
+  id: string;
+  name: string;
+  description: string;
+  thumbnail: string;
+  promptTemplate: string;
+}

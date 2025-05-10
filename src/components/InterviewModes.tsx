@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   Brain
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const InterviewModes = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -157,11 +158,12 @@ export const InterviewModes = () => {
                     </div>
                     
                     <div className="pt-4 flex justify-center">
-                      
+                      <Link to="/chat-practices">
                       <Button className="bg-gradient-to-r from-prep-primary to-prep-secondary hover:opacity-90 text-white transition-all duration-300 transform hover:scale-105">
                         Try Text Interview Mode
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
+                      </Link>
                     </div>
                   </div>
                 </Card>
@@ -244,10 +246,12 @@ export const InterviewModes = () => {
                     </div>
                     
                     <div className="pt-4 flex justify-center">
+                    <Link to="/voice-practice">
                       <Button className="bg-gradient-to-r from-prep-coral to-prep-accent hover:opacity-90 text-white transition-all duration-300 transform hover:scale-105">
                         Try Audio Interview Mode
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
+                      </Link>
                     </div>
                   </div>
                 </Card>
@@ -316,10 +320,12 @@ export const InterviewModes = () => {
                     </div>
                     
                     <div className="pt-4 flex justify-center">
+                    <Link to="/video-mode">
                       <Button className="bg-gradient-to-r from-prep-aqua to-prep-accent hover:opacity-90 text-white transition-all duration-300 transform hover:scale-105">
                         Try Video Interview Mode
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
+                      </Link>
                       
                     </div>
                   </div>

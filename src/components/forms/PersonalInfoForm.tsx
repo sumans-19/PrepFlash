@@ -1,10 +1,10 @@
 import React from 'react';
-import { useResumeContext } from '../../context/ResumeContext';
+import { useResume } from '../../context/ResumeContext';
 import FormSection from './FormSection';
 import TextInput from '../ui/TextInput';
 
 const PersonalInfoForm: React.FC = () => {
-  const { resumeData, updatePersonalInfo } = useResumeContext();
+  const { resumeData, updatePersonalInfo } = useResume();
   const { personalInfo } = resumeData;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

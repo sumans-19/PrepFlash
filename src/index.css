@@ -251,4 +251,32 @@
 }
 
 
+@layer components {
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+  
+  .gradient-overlay {
+    @apply bg-gradient-to-t from-black/70 to-transparent absolute inset-0 rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100;
+  }
+  
+  .badge {
+    @apply px-2 py-1 text-xs font-medium rounded-full;
+  }
+  
+  .badge-primary {
+    @apply bg-primary/20 text-primary-foreground;
+  }
+  
+  .badge-secondary {
+    @apply bg-secondary/20 text-secondary-foreground;
+  }
+  
+  .badge-accent {
+    @apply bg-accent/20 text-accent-foreground;
+  }
 }
+}
+
+
+

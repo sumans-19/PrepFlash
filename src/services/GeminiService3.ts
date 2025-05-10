@@ -93,7 +93,7 @@ export class GeminiService {
     }
   }
 
-  public async getQuizQuestions(jobRoleId: string, count: number = 5): Promise<QuizQuestion[]> {
+  public async getQuizQuestions(jobRoleId: string, count: number = 10): Promise<QuizQuestion[]> {
     const prompt = `Generate ${count} technical interview questions for a ${jobRoleId} position. 
     Each question should have 4 options with one correct answer and an explanation. 
     Return only a JSON array with objects containing id, question, options array, correctAnswer index, and explanation. Do not include markdown formatting or code fences.`;

@@ -7,6 +7,7 @@ import AIChat from './AIChat';
 import GeminiService from '../../services/GeminiService3';
 import { jobRoles } from '@/data/jobRoles';
 import { ThemeToggle } from '../ui/theme-toggle';
+import { DashboardNav } from '../DashboardNav';
 
 const FlashCardPage: React.FC = () => {
     const { roleId } = useParams<{ roleId: string }>();
@@ -126,17 +127,8 @@ const FlashCardPage: React.FC = () => {
 
     return (
         <>
-            <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border">
-                <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-                    {/* Logo + Brand Name */}
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                            Prep<span className="font-black">Toolkit</span>
-                        </h1>
-                    </div>
-                    <ThemeToggle></ThemeToggle>
-                </div>
-            </header>
+            <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+                  <DashboardNav />
             <div className="min-h-screen flex flex-col mt-8">
                 <div className="flex-1 max-w-6xl mx-auto w-full px-4 pb-24">
                     <button
@@ -251,6 +243,7 @@ const FlashCardPage: React.FC = () => {
                         <AIChat jobRoleId={roleId || ''} />
                     </div>
                 </div>
+            </div>
             </div>
         </>
     );

@@ -18,13 +18,14 @@ const FormNav: React.FC<FormNavProps> = ({ activeSection, setActiveSection }) =>
     { id: 'skills', label: 'Skills', icon: <Lightbulb className="w-5 h-5" /> },
     { id: 'achievements', label: 'Achievements', icon: <Award className="w-5 h-5" /> },
     { id: 'additional', label: 'Additional', icon: <Info className="w-5 h-5" /> },
+    { id: 'resumetemplate', label: 'Templates', icon: <Info className="w-5 h-5" /> },
+
   ];
 
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-foreground">Resume Sections</h2>
-        <ThemeToggle />
       </div>
       <div className="flex flex-wrap gap-2">
         {navItems.map((item) => (

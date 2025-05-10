@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { toast } from "sonner";
 import { useUser } from "@/contexts/UserContext";
+import { sendEmailVerification } from "firebase/auth";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -39,45 +40,57 @@ const Auth = () => {
     }
   };
 
+
   const handleSubmit = async () => {
     if (!email || !password || (!isLogin && !name)) {
       setError(isLogin ? "Please enter email and password" : "Please enter name, email, and password");
       return;
     }
-
+  
     setError("");
     setIsLoading(true);
-
+  
     try {
       if (isLogin) {
         const { user } = await signInWithEmailAndPassword(auth, email, password);
+        
+        if (!user.emailVerified) {
+          toast.warning("Email not verified", {
+            description: "Please check your inbox for a verification email."
+          });
+          await sendEmailVerification(user);
+          return;
+        }
+  
         toast.success("Welcome back!", {
           description: "Successfully logged in to your account."
         });
-        navigate("/profile");
+  
+        navigate("/profile-setup");
       } else {
-        // Create new user
         const { user } = await createUserWithEmailAndPassword(auth, email, password);
-        
-        // Set display name
+  
         await updateProfile(user, { displayName: name });
-        
-        // Create a basic profile document
+  
         await setDoc(doc(db, 'profiles', user.uid), {
           name: name,
           email: user.email,
           createdAt: new Date().toISOString()
         });
-        
+  
+        // Send verification email
+        await sendEmailVerification(user);
+  
         toast.success("Account created!", {
-          description: "Your account has been created successfully."
+          description: "Verification email sent. Please verify your email before continuing."
         });
-        
-        navigate("/profile-setup");
+  
+        // Don't navigate until user verifies
+        setIsLogin(true); // Switch to login view after sign up
       }
     } catch (err: any) {
       let errorMessage = "An error occurred. Please try again.";
-      
+  
       if (err.code === 'auth/email-already-in-use') {
         errorMessage = "This email is already registered. Please sign in instead.";
       } else if (err.code === 'auth/weak-password') {
@@ -87,7 +100,7 @@ const Auth = () => {
       } else if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
         errorMessage = "Invalid email or password.";
       }
-      
+  
       setError(errorMessage);
       toast.error("Error", {
         description: errorMessage

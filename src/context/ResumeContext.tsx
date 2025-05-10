@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { Template } from '../types/index';
+import { defaultTemplates } from '../data/templates';
 
 export type Experience = {
   id: string;
@@ -86,27 +88,42 @@ type ResumeContextType = {
   updateAchievement: (id: string, field: string, value: string) => void;
   removeAchievement: (id: string) => void;
   updateAdditionalInfo: (value: string) => void;
+  selectedTemplate: string;
+  selectTemplate: (templateId: string) => void;
+  templates: Template[];
+  currentPrompt: string;
+  activeSection: string;
+  setActiveSection: (section: string) => void;
 };
 
 const ResumeContext = createContext<ResumeContextType | undefined>(undefined);
 
-// const [generatedResume, setGeneratedResume] = useState<string>('');
-
-export const useResumeContext = () => {
+export const useResume = () => {
   const context = useContext(ResumeContext);
-  if (!context) {
-    throw new Error('useResumeContext must be used within a ResumeProvider');
+  if (context === undefined) {
+    throw new Error('useResume must be used within a ResumeProvider');
   }
   return context;
 };
 
 export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [resumeData, setResumeData] = useState<ResumeData>(initialState);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>(defaultTemplates[0].id);
+  const [templates] = useState<Template[]>(defaultTemplates);
+  const [currentPrompt, setCurrentPrompt] = useState<string>(defaultTemplates[0].promptTemplate);
+  const [activeSection, setActiveSection] = useState<string>('personal');
+
+  useEffect(() => {
+    const template = templates.find(t => t.id === selectedTemplate);
+    if (template) {
+      setCurrentPrompt(template.promptTemplate);
+    }
+  }, [selectedTemplate, templates]);
 
   const generateId = () => Math.random().toString(36).substring(2, 9);
 
   const updatePersonalInfo = (field: string, value: string) => {
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
       personalInfo: {
         ...prev.personalInfo,
@@ -116,7 +133,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const updateTargetRole = (field: string, value: string) => {
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
       targetRole: {
         ...prev.targetRole,
@@ -134,25 +151,25 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       endDate: '',
       description: '',
     };
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
       experience: [...prev.experience, newExperience],
     }));
   };
 
   const updateExperience = (id: string, field: string, value: string) => {
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
-      experience: prev.experience.map((exp) =>
+      experience: prev.experience.map(exp =>
         exp.id === id ? { ...exp, [field]: value } : exp
       ),
     }));
   };
 
   const removeExperience = (id: string) => {
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
-      experience: prev.experience.filter((exp) => exp.id !== id),
+      experience: prev.experience.filter(exp => exp.id !== id),
     }));
   };
 
@@ -164,25 +181,25 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       year: '',
       achievements: '',
     };
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
       education: [...prev.education, newEducation],
     }));
   };
 
   const updateEducation = (id: string, field: string, value: string) => {
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
-      education: prev.education.map((edu) =>
+      education: prev.education.map(edu =>
         edu.id === id ? { ...edu, [field]: value } : edu
       ),
     }));
   };
 
   const removeEducation = (id: string) => {
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
-      education: prev.education.filter((edu) => edu.id !== id),
+      education: prev.education.filter(edu => edu.id !== id),
     }));
   };
 
@@ -192,25 +209,25 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       name: '',
       type,
     };
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
       skills: [...prev.skills, newSkill],
     }));
   };
 
   const updateSkill = (id: string, field: string, value: string) => {
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
-      skills: prev.skills.map((skill) =>
+      skills: prev.skills.map(skill =>
         skill.id === id ? { ...skill, [field]: value } : skill
       ),
     }));
   };
 
   const removeSkill = (id: string) => {
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
-      skills: prev.skills.filter((skill) => skill.id !== id),
+      skills: prev.skills.filter(skill => skill.id !== id),
     }));
   };
 
@@ -220,73 +237,63 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       title: '',
       description: '',
     };
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
       achievements: [...prev.achievements, newAchievement],
     }));
   };
 
   const updateAchievement = (id: string, field: string, value: string) => {
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
-      achievements: prev.achievements.map((achievement) =>
+      achievements: prev.achievements.map(achievement =>
         achievement.id === id ? { ...achievement, [field]: value } : achievement
       ),
     }));
   };
 
   const removeAchievement = (id: string) => {
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
-      achievements: prev.achievements.filter((achievement) => achievement.id !== id),
+      achievements: prev.achievements.filter(achievement => achievement.id !== id),
     }));
   };
 
   const updateAdditionalInfo = (value: string) => {
-    setResumeData((prev) => ({
+    setResumeData(prev => ({
       ...prev,
       additionalInfo: value,
     }));
   };
 
-  // const generateResumePreview = async () => {
-  //   try {
-  //     const response = await fetch('/api/generate-resume', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(resumeData), // full collected resume info
-  //     });
-
-  //     if (!response.ok) throw new Error('Failed to generate resume');
-  //     const data = await response.json();
-  //     setGeneratedResume(data.generatedResume);
-  //   } catch (error) {
-  //     console.error('Error generating resume:', error);
-  //   }
-  // };
-
-  const value = {
-    resumeData,
-    // generateResumePreview,
-    // generatedResume,
-    updatePersonalInfo,
-    updateTargetRole,
-    addExperience,
-    updateExperience,
-    removeExperience,
-    addEducation,
-    updateEducation,
-    removeEducation,
-    addSkill,
-    updateSkill,
-    removeSkill,
-    addAchievement,
-    updateAchievement,
-    removeAchievement,
-    updateAdditionalInfo,
-  };
-
-  return <ResumeContext.Provider value={value}>{children}</ResumeContext.Provider>;
+  return (
+    <ResumeContext.Provider
+      value={{
+        resumeData,
+        updatePersonalInfo,
+        updateTargetRole,
+        addExperience,
+        updateExperience,
+        removeExperience,
+        addEducation,
+        updateEducation,
+        removeEducation,
+        addSkill,
+        updateSkill,
+        removeSkill,
+        addAchievement,
+        updateAchievement,
+        removeAchievement,
+        updateAdditionalInfo,
+        selectedTemplate,
+        selectTemplate: setSelectedTemplate,
+        templates,
+        currentPrompt,
+        activeSection,
+        setActiveSection,
+      }}
+    >
+      {children}
+    </ResumeContext.Provider>
+  );
 };

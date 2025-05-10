@@ -27,34 +27,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
           </motion.div>
           
           <div className="flex items-center gap-4">
-            <Tabs value={activeTab} className="w-auto">
-              <TabsList>
-                <TabsTrigger value="news" onClick={() => onTabChange("news")} className="relative">
-                  <motion.div
-                    animate={{ scale: activeTab === "news" ? 1 : 0.95 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    News
-                  </motion.div>
-                </TabsTrigger>
-                <TabsTrigger value="jobs" onClick={() => onTabChange("jobs")} className="relative">
-                  <motion.div
-                    animate={{ scale: activeTab === "jobs" ? 1 : 0.95 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    Jobs
-                  </motion.div>
-                </TabsTrigger>
-                <TabsTrigger value="internships" onClick={() => onTabChange("internships")} className="relative">
-                  <motion.div
-                    animate={{ scale: activeTab === "internships" ? 1 : 0.95 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    Internships
-                  </motion.div>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            
             <ThemeToggle />
           </div>
         </div>

@@ -20,11 +20,11 @@ const Leaderboard = () => {
   const [sortBy, setSortBy] = useState("points");
   const [timeframe, setTimeframe] = useState("week");
   const [users, setUsers] = useState([
-    { id: 1, name: "Alex Johnson", points: 1250, streak: 12, solved: 45, avatar: "https://i.pravatar.cc/150?img=1" },
-    { id: 2, name: "Jamie Smith", points: 980, streak: 8, solved: 32, avatar: "https://i.pravatar.cc/150?img=2" },
-    { id: 3, name: "Taylor Kim", points: 870, streak: 15, solved: 28, avatar: "https://i.pravatar.cc/150?img=3" },
-    { id: 4, name: "Morgan Lee", points: 760, streak: 7, solved: 24, avatar: "https://i.pravatar.cc/150?img=4" },
-    { id: 5, name: "Casey Brown", points: 650, streak: 5, solved: 19, avatar: "https://i.pravatar.cc/150?img=5" },
+    { id: 1, name: "Likhith ", points: 1250, streak: 12, solved: 45, avatar: "https://img.freepik.com/free-vector/young-man-with-glasses-illustration_1308-174706.jpg?t=st=1746755415~exp=1746759015~hmac=02268bcf611b9a0d7420db32f34beed4b5419ef42daa4bd6dca3d9134449db40&w=996" },
+    { id: 2, name: "Suman", points: 980, streak: 8, solved: 32, avatar: "https://img.freepik.com/free-vector/mysterious-mafia-man-smoking-cigarette_52683-34828.jpg?ga=GA1.1.647214895.1746001902&semt=ais_hybrid&w=740" },
+    { id: 3, name: "Yogesh", points: 870, streak: 15, solved: 28, avatar: "https://img.freepik.com/free-vector/smiling-redhaired-boy-illustration_1308-176664.jpg?ga=GA1.1.647214895.1746001902&semt=ais_hybrid&w=740" },
+    { id: 4, name: "Sagar", points: 760, streak: 7, solved: 24, avatar: "https://img.freepik.com/free-psd/3d-rendering-hair-style-avatar-design_23-2151869153.jpg?ga=GA1.1.647214895.1746001902&semt=ais_hybrid&w=740" },
+    { id: 5, name: "Tejas", points: 650, streak: 5, solved: 19, avatar: "https://img.freepik.com/free-vector/young-man-with-glasses-avatar_1308-175763.jpg?ga=GA1.1.647214895.1746001902&semt=ais_hybrid&w=740" },
   ]);
 
   useEffect(() => {
@@ -272,8 +272,8 @@ const DiscussionForum = () => {
   const [posts, setPosts] = useState([
     {
       id: 1,
-      author: "Taylor Kim",
-      avatar: "https://i.pravatar.cc/150?img=3",
+      author: "Likhith ",
+      avatar: "https://img.freepik.com/free-vector/young-man-with-glasses-avatar_1308-175763.jpg?ga=GA1.1.647214895.1746001902&semt=ais_hybrid&w=740",
       category: "system-design",
       title: "Approaches to database sharding",
       content: "What are some effective strategies for database sharding in high-traffic applications? I'm working on a project that needs to scale horizontally.",
@@ -283,8 +283,8 @@ const DiscussionForum = () => {
     },
     {
       id: 2,
-      author: "Alex Johnson",
-      avatar: "https://i.pravatar.cc/150?img=1",
+      author: "Yogesh",
+      avatar: "https://img.freepik.com/free-vector/young-man-with-glasses-illustration_1308-174706.jpg?t=st=1746755415~exp=1746759015~hmac=02268bcf611b9a0d7420db32f34beed4b5419ef42daa4bd6dca3d9134449db40&w=996",
       category: "algorithms",
       title: "Optimizing dynamic programming solutions",
       content: "I'm struggling with optimizing a DP solution for a knapsack problem variant. Any tips on reducing the space complexity?",
@@ -294,8 +294,8 @@ const DiscussionForum = () => {
     },
     {
       id: 3,
-      author: "Jamie Smith",
-      avatar: "https://i.pravatar.cc/150?img=2",
+      author: "suman",
+      avatar: "https://img.freepik.com/free-psd/3d-rendering-hair-style-avatar-design_23-2151869153.jpg?ga=GA1.1.647214895.1746001902&semt=ais_hybrid&w=740",
       category: "behavioral",
       title: "Handling conflict resolution questions",
       content: "What's your go-to framework for answering conflict resolution questions in behavioral interviews?",
@@ -311,7 +311,7 @@ const DiscussionForum = () => {
     const newPostObj = {
       id: posts.length + 1,
       author: "You",
-      avatar: "https://i.pravatar.cc/150?img=8",
+      avatar: "https://img.freepik.com/free-vector/smiling-redhaired-boy-illustration_1308-176664.jpg?ga=GA1.1.647214895.1746001902&semt=ais_hybrid&w=740",
       category: "general",
       title: newPost.slice(0, 50) + (newPost.length > 50 ? "..." : ""),
       content: newPost,

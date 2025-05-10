@@ -30,6 +30,7 @@ import WebDevelopmentCourse from "./pages/WebDevelopmentCourse";
 import { ThemeProvider } from "next-themes";
 import AiMlCourse from "./pages/AiMlCourse";
 import CommunityPage from "./pages/CommunityPage";
+import Communitygroup from "./components/CreateGroupModal";
 import Roadmappage from "./pages/Roadmappage";
 import ResumeBuilderPage from "./pages/ResumeBuilderPage";
 import TechHub from "./pages/TechHub";
@@ -38,9 +39,13 @@ import FlashCardPage from "./components/flashcards/FlashCardPage";
 import PrepOptions from "./components/PrepOptions";
 import QuizPage from "./quiz/QuizPage";
 import ResultsPage from "./quiz/ResultsPage";
+import { BehavioralMasteryHub } from './components/BehavioralMasteryHub/BehavioralMasteryHub';
+
+import ATSScoreChecker from "./components/ATSScoreChecker";
 // import ProfilePage from "./pages/ProfilePage";
 
 import React from "react";
+import News from "./pages/News";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +82,7 @@ const App = () => {
               <Route path="/community" element={<CommunityPage />} />
               <Route path="/aptitude-questions" element={<AptitudeQuestionBank />} />
               <Route path="/aptitudehome" element={<AptitudeHome />} />
+              
 
 
               <Route path="/learningtoolkit" element={<LearningToolKit />} />
@@ -88,12 +94,15 @@ const App = () => {
               <Route path="/roadmap" element={<Roadmappage />} />
               <Route path="/resume-builder" element={<ResumeBuilderPage />} />
               <Route path="/tech-hub" element={<TechHub />} />
+              <Route path="/tech-news" element={<News />} />
+              <Route path="/ats-checker" element={<ATSScoreChecker />} />
               <Route path="/prep-kit" element={<JobRoleSelection />} />
               <Route path="/prep-options/:roleId" element={<PrepOptions />} />
               <Route path="/flash-cards/:roleId" element={<FlashCardPage />} />
               <Route path="/quiz/:roleId" element={<QuizPage />} />
               <Route path="/quiz-results/:roleId" element={<ResultsPage />} />
-
+              <Route path="/behaviour" element={<BehavioralMasteryHub />} />
+              
 
 
 

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FileText, BookOpen, ArrowLeft, ArrowRight } from 'lucide-react';
 import { jobRoles } from '@/data/jobRoles';
 import { ThemeToggle } from './ui/theme-toggle';
+import { DashboardNav } from './DashboardNav';
 
 const PrepOptions: React.FC = () => {
     const { roleId } = useParams<{ roleId: string }>();
@@ -44,18 +45,8 @@ const PrepOptions: React.FC = () => {
 
     return (
         <>
-            <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border">
-                <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-
-                    {/* Logo + Brand Name */}
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                            Prep<span className="font-black">Toolkit</span>
-                        </h1>
-                    </div>
-                    <ThemeToggle></ThemeToggle> 
-                </div>
-            </header>
+            <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+                  <DashboardNav />
 
 
             <div className="max-w-4xl mx-auto mt-10">
@@ -104,6 +95,7 @@ const PrepOptions: React.FC = () => {
                         </div>
                     ))}
                 </div>
+            </div>
             </div>
         </>
     );

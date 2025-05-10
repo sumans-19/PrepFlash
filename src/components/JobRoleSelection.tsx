@@ -5,6 +5,7 @@ import * as Icons from 'lucide-react';
 import { jobRoles } from '@/data/jobRoles';
 import { ThemeToggle } from './ui/theme-toggle';
 import { motion } from 'framer-motion';
+import { DashboardNav } from './DashboardNav';
 
 interface Category {
     id: string;
@@ -49,16 +50,8 @@ const JobRoleSelection: React.FC = () => {
 
     return (
         <>
-            <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border">
-                <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                            Prep<span className="font-black">Toolkit</span>
-                        </h1>
-                    </div>
-                    <ThemeToggle />
-                </div>
-            </header>
+            <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+                  <DashboardNav />
 
             <div className="min-h-screen bg-gradient-to-b from-background to-background/80 mt-5">
                 <div className="max-w-7xl mx-auto px-4 py-12">
@@ -68,7 +61,7 @@ const JobRoleSelection: React.FC = () => {
                         transition={{ duration: 0.6 }}
                         className="text-center mb-12"
                     >
-                        <h1 className="text-4xl font-bold mb-4">
+                        <h1 className="text-4xl font-bold mb-4 mt-4">
                             Prepare for Your Dream Job Interview
                         </h1>
                         <p className="text-lg text-muted-foreground">
@@ -201,6 +194,7 @@ const JobRoleSelection: React.FC = () => {
                         </motion.div>
                     )}
                 </div>
+            </div>
             </div>
         </>
     );

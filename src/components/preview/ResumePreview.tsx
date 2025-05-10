@@ -1,5 +1,5 @@
-import React, { useState ,useRef} from 'react';
-import { useResumeContext } from '../../context/ResumeContext';
+import React, { useState, useRef, useEffect } from 'react';
+import { useResume } from '../../context/ResumeContext';
 import { Mail, Phone, MapPin, Linkedin, Globe, Check, X, WandSparkles } from 'lucide-react';
 import axios from 'axios';
 import html2pdf from 'html2pdf.js';
@@ -9,7 +9,7 @@ interface ResumePreviewProps {
 }
 
 const ResumePreview: React.FC<ResumePreviewProps> = ({ isEditable = false }) => {
-  const { resumeData } = useResumeContext();
+  const { resumeData, currentPrompt } = useResume();
   const { personalInfo, targetRole, experience, education, skills, achievements, additionalInfo } = resumeData;
 
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -17,16 +17,23 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ isEditable = false }) => 
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [generatedResume, setGeneratedResume] = useState<string | null>(null);
 
+  const resumeRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
   const startEditing = (field: string, value: string) => {
     if (!isEditable) return;
     setEditingField(field);
     setEditValue(value);
   };
-  const resumeRef = useRef<HTMLDivElement>(null);
 
   const handleDownload = () => {
-    if (!resumeRef.current) return;
-
+    if (!iframeRef.current) return;
+    
+    const iframe = iframeRef.current;
+    const iframeDoc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
+    
+    if (!iframeDoc) return;
+    
     html2pdf().set({
       margin: 0,
       filename: 'resume.pdf',
@@ -34,12 +41,9 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ isEditable = false }) => 
       html2canvas: { scale: 4, dpi: 300, letterRendering: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     })
-      .from(resumeRef.current)
+      .from(iframeDoc.body)
       .save();
   };
-
-
-
 
   const saveEdit = () => {
     // Ideally, update resumeData state or backend here
@@ -83,10 +87,16 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ isEditable = false }) => 
   const handlePreviewClick = async () => {
     setLoadingPreview(true);
     try {
-      const response = await axios.post('http://localhost:8000/api/generate-resume/', { resumeData });
+      const response = await axios.post('http://localhost:8000/api/generate-resume/', {
+        resumeData,
+        currentPrompt,
+      });
+      
       if (response.data.generatedResume) {
-        console.log(response.data.generatedResume)
-        setGeneratedResume(response.data.generatedResume); // Expecting clean HTML from backend
+        setGeneratedResume(response.data.generatedResume);
+        
+        // After setting the generated resume, we need to set up the iframe
+        // This will happen via the useEffect hook
       }
     } catch (error) {
       console.error('Failed to generate resume preview:', error);
@@ -95,28 +105,89 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ isEditable = false }) => 
     }
   };
 
+  // Function to set up the iframe with proper HTML content
+  const setupIframe = () => {
+    if (!iframeRef.current || !generatedResume) return;
+    
+    const iframe = iframeRef.current;
+    const iframeDoc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
+    
+    if (!iframeDoc) return;
+    
+    // Clean the HTML (remove markdown code block markers if present)
+    const cleanHTML = generatedResume
+      .replace(/^```html\n/, '')
+      .replace(/```$/, '');
+    
+    // Create a complete HTML document
+    iframeDoc.open();
+    iframeDoc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Resume Preview</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 16px;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            }
+            /* Reset all styles to prevent conflicts */
+            * {
+              box-sizing: border-box;
+            }
+            /* Add any other global styles for the resume here */
+          </style>
+        </head>
+        <body>
+          ${cleanHTML}
+        </body>
+      </html>
+    `);
+    iframeDoc.close();
+    
+    // Adjust iframe height to fit content
+    const resizeIframe = () => {
+      if (iframe && iframe.contentWindow && iframe.contentWindow.document.body) {
+        const height = iframe.contentWindow.document.body.scrollHeight;
+        iframe.style.height = `${height + 32}px`; // Add padding
+      }
+    };
+    
+    // Handle iframe load event
+    iframe.onload = resizeIframe;
+    // Also try after a short delay in case onload doesn't fire properly
+    setTimeout(resizeIframe, 100);
+  };
 
+  // Set up the iframe when generatedResume changes
+  useEffect(() => {
+    if (generatedResume) {
+      setupIframe();
+    }
+  }, [generatedResume]);
 
   if (generatedResume) {
-    const cleanHTML = generatedResume
-      .replace(/^```html\n/, '') // Remove starting ```html and the following newline
-      .replace(/```$/, '');
-
     return (
       <div className="bg-white border rounded-md shadow-sm">
-        <div
-          ref={resumeRef}
+        <div 
+          ref={resumeRef} 
+          className="a4-wrapper"
           style={{
             background: 'white',
-            boxSizing: 'border-box'
+            width: '100%',
+            boxSizing: 'border-box',
+            margin: '0 auto',
           }}
         >
-          <div style={{boxSizing: 'border-box', width: '100%', height: '100%' }}>
-            <div
-              className="prose max-w-none"
-              dangerouslySetInnerHTML={{ __html: cleanHTML }}
-            />
-          </div>
+          <iframe 
+            ref={iframeRef}
+            className="w-full border-0 overflow-hidden" 
+            title="Resume Preview"
+            style={{ minHeight: '800px' }}
+          />
         </div>
 
         <div className="flex justify-center mt-6">
@@ -128,7 +199,6 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ isEditable = false }) => 
           </button>
         </div>
       </div>
-
     );
   }
 
@@ -147,8 +217,7 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ isEditable = false }) => 
           {loadingPreview ? 'Generating...' : 'Preview Resume'}
         </button>
       </div>
-
-      {/* You can continue rendering other editable fields if needed */}
+      {/* Add other editable content blocks here */}
     </div>
   );
 };

@@ -1,11 +1,11 @@
 import React from 'react';
-import { useResumeContext } from '../../context/ResumeContext';
+import { useResume } from '../../context/ResumeContext';
 import FormSection from './FormSection';
 import TextInput from '../ui/TextInput';
 import { Plus, Trash2 } from 'lucide-react';
 
 const SkillsForm: React.FC = () => {
-  const { resumeData, addSkill, updateSkill, removeSkill } = useResumeContext();
+  const { resumeData, addSkill, updateSkill, removeSkill } = useResume();
   const { skills } = resumeData;
 
   const hardSkills = skills.filter((skill) => skill.type === 'hard');

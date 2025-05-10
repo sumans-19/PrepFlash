@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -33,11 +32,15 @@ const practiceTypes = [
     description: "Master your verbal communication with advanced voice analysis.",
     features: ["Speech clarity check", "Tone analysis", "Confidence scoring"],
     gradient: ["#D6BCFA", "#9b87f5"],
-    to: "/voice-practice"
+    to: "http://localhost:5173/"
   }
 ];
 
 const Practice = () => {
+  const handleExternalNavigation = (url: string) => {
+    window.location.href = url;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <DashboardNav />
@@ -65,7 +68,7 @@ const Practice = () => {
               whileHover={{ y: -8, transition: { duration: 0.2 } }}
             >
               <Card className="relative overflow-hidden border-2 h-full dark:bg-gray-800/50 bg-white/50 backdrop-blur-sm">
-                <div 
+                <div
                   className="absolute inset-0 opacity-10"
                   style={{
                     background: `linear-gradient(135deg, ${type.gradient[0]}40 0%, ${type.gradient[1]}40 100%)`,
@@ -91,18 +94,31 @@ const Practice = () => {
                       </li>
                     ))}
                   </ul>
-                  <Button
-                    asChild
-                    className="w-full font-medium"
-                    style={{
-                      background: `linear-gradient(135deg, ${type.gradient[0]} 0%, ${type.gradient[1]} 100%)`,
-                    }}
-                  >
-                    <Link to={type.to}>
+                  {type.to.startsWith('http') ? (
+                    <button
+                      onClick={() => handleExternalNavigation(type.to)}
+                      className="w-full inline-flex items-center justify-center font-medium px-4 py-2 rounded-md text-white"
+                      style={{
+                        background: `linear-gradient(135deg, ${type.gradient[0]} 0%, ${type.gradient[1]} 100%)`,
+                      }}
+                    >
                       Start {type.title}
                       <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
+                    </button>
+                  ) : (
+                    <Button
+                      asChild
+                      className="w-full font-medium"
+                      style={{
+                        background: `linear-gradient(135deg, ${type.gradient[0]} 0%, ${type.gradient[1]} 100%)`,
+                      }}
+                    >
+                      <Link to={type.to}>
+                        Start {type.title}
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>

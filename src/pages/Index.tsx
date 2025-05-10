@@ -9,6 +9,7 @@ import {AnalyticsInsights} from "@/components/AnalyticsInsights";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import { InterviewModes }from "@/components/InterviewModes";
+import { Footer } from "@/components/ui/Footer";
 /**
  * Home page layout:
  * - Hero
@@ -28,7 +29,7 @@ const Index = () => {
       <Features />
       <InterviewModes/>
       <HowItWorksSection />
-      <AnalyticsInsights/>
+      <Footer/>
     </div>
   );
 };

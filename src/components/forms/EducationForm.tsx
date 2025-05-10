@@ -1,5 +1,5 @@
 import React from 'react';
-import { useResumeContext } from '../../context/ResumeContext';
+import { useResume } from '../../context/ResumeContext';
 import FormSection from './FormSection';
 import TextInput from '../ui/TextInput';
 
@@ -7,7 +7,7 @@ import TextArea from './TextArea';
 import { Plus, Trash2 } from 'lucide-react';
 
 const EducationForm: React.FC = () => {
-  const { resumeData, addEducation, updateEducation, removeEducation } = useResumeContext();
+  const { resumeData, addEducation, updateEducation, removeEducation } = useResume();
   const { education } = resumeData;
 
   const handleChange = (id: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

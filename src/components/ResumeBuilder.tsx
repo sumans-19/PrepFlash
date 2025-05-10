@@ -9,8 +9,9 @@ import AdditionalInfoForm from './forms/AdditionalInfoForm';
 import ResumePreview from './preview/ResumePreview';
 import FormNav from './forms/FormNav';
 import { FileText, Eye, PenSquare } from 'lucide-react';
+import TemplatesForm from './forms/TemplatesForm';
 
-type FormSection = 'personal' | 'target' | 'experience' | 'education' | 'skills' | 'achievements' | 'additional';
+type FormSection = 'personal' | 'target' | 'experience' | 'education' | 'skills' | 'achievements' | 'additional' |'resumetemplate';
 type ViewMode = 'form' | 'preview' | 'edit';
 
 const ResumeBuilder: React.FC = () => {
@@ -33,6 +34,8 @@ const ResumeBuilder: React.FC = () => {
         return <AchievementsForm />;
       case 'additional':
         return <AdditionalInfoForm />;
+      case 'resumetemplate':
+        return <TemplatesForm />;
       default:
         return <PersonalInfoForm />;
     }

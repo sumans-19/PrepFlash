@@ -1,3 +1,5 @@
+
+import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { motion } from "framer-motion";
 
@@ -51,12 +53,16 @@ export function Hero() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
+            <Link to="/dashboard">
             <Button className="bg-gradient-to-r from-indigo-500 to-fuchsia-400 hover:opacity-90 hover:scale-110 transition-all text-white px-10 py-6 text-xl rounded-xl shadow-lg">
               Start Practicing
             </Button>
+            </Link>
+            <Link to="/features">
             <Button variant="outline" className="hover:scale-110 transition-transform px-10 py-6 text-xl rounded-xl border-2 border-indigo-400 dark:border-fuchsia-400 hover:bg-indigo-50 dark:hover:bg-fuchsia-900/10">
               Learn More
             </Button>
+            </Link>
           </motion.div>
         </div>
         <div className="flex-1 flex justify-center items-center w-200 h-200">

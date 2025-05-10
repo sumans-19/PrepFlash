@@ -97,7 +97,7 @@ const ProfileDisplay = () => {
           <h2 className="text-2xl font-bold mb-4">Profile Not Found</h2>
           <p className="mb-6 text-gray-600">We couldn't find your profile information. Let's create one now!</p>
           <Button asChild>
-            <Link to="/">Create Profile</Link>
+            <Link to="/profile-setup">Create Profile</Link>
           </Button>
         </Card>
       </div>
@@ -479,25 +479,25 @@ const ProfileDisplay = () => {
                   <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-5 rounded-lg text-center hover-lift transition-all">
                     <h3 className="font-medium mb-2 text-gray-900">Mock Interviews</h3>
                     <p className="text-sm text-gray-600 mb-3">Practice for your dream job</p>
-                    <Link to="/">
-                    <Button variant="outline" size="sm" >Coming soon</Button>
+                    <Link to="/practice">
+                    <Button variant="outline" size="sm" >Click Here</Button>
                     </Link>
                   </div>
 
                   <div className="bg-gradient-to-r from-blue-50 to-sky-50 p-5 rounded-lg text-center hover-lift transition-all">
                     <h3 className="font-medium mb-2 text-gray-900">Resume Builder</h3>
                     <p className="text-sm text-gray-600 mb-3">Create a professional resume</p>
-                    <Link to="/">
-                    <Button variant="outline" size="sm" >Coming soon</Button>
+                    <Link to="/resume-builder">
+                    <Button variant="outline" size="sm" >Click Here</Button>
                     </Link>
                   </div>
 
                   <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-5 rounded-lg text-center hover-lift transition-all">
-                    <h3 className="font-medium mb-2 text-gray-900">Interview Tips</h3>
+                    <h3 className="font-medium mb-2 text-gray-900">Behavioral Tips</h3>
                     <p className="text-sm text-gray-600 mb-3">Expert advice for success</p>
                     
                     <Link to="/">
-                    <Button variant="outline" size="sm" >Coming soon 
+                    <Button variant="outline" size="sm" >Click here 
                     </Button>
                     </Link>
                   </div>

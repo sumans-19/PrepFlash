@@ -617,20 +617,13 @@ const LearningToolKit = () => {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-2 mb-12">
+            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-1 mb-12">
               <TabsTrigger 
                 value="learning-guide"
                 className="text-lg py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 <Book className="mr-2 h-5 w-5" />
                 Learning Guide
-              </TabsTrigger>
-              <TabsTrigger 
-                value="learning-path"
-                className="text-lg py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-              >
-                <Route className="mr-2 h-5 w-5" />
-                Learning Roadmap
               </TabsTrigger>
             </TabsList>
             
@@ -670,17 +663,15 @@ const LearningToolKit = () => {
                 Join thousands of learners who have accelerated their growth with our structured learning paths and comprehensive resources.
               </p>
               <div className="flex flex-wrap gap-4">
+                <Link to="/roadmap">
                 <Button size="lg" className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6 h-auto font-medium">
-                  Get Started Now
+                  Explore Roadmap
                 </Button>
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 text-lg px-8 py-6 h-auto font-medium">
-                  Explore All Resources
-                </Button>
+                </Link>
               </div>
             </div>
             
             <div className="p-8 bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20">
-              <h3 className="text-2xl font-bold text-white mb-6">Why Choose Our Learning Platform?</h3>
               <ul className="space-y-4">
                 {[
                   { text: "Interactive learning experience with immediate feedback", icon: Sparkles },

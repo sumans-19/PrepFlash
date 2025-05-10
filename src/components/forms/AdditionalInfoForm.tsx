@@ -1,11 +1,11 @@
 import React from 'react';
-import { useResumeContext } from '../../context/ResumeContext';
+import { useResume } from '../../context/ResumeContext';
 import FormSection from './FormSection';
 
 import TextArea from './TextArea';
 
 const AdditionalInfoForm: React.FC = () => {
-  const { resumeData, updateAdditionalInfo } = useResumeContext();
+  const { resumeData, updateAdditionalInfo } = useResume();
   const { additionalInfo } = resumeData;
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
